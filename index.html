@@ -232,7 +232,6 @@
         .screen { display: none; width: 100%; }
         .screen.active { display: flex; flex-direction: column; align-items: center; }
 
-        /* Admin Table Styles */
         .admin-table {
             width: 100%;
             max-width: 500px;
@@ -352,7 +351,7 @@
         if (isNaN(xp)) xp = 300;
 
         let adStartTime = 0;
-        let isWithdrawSubmitting = false; // Prevents double submission
+        let isWithdrawSubmitting = false;
 
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
@@ -439,11 +438,15 @@
         }
 
         function submitWithdrawal() {
+            // Strict check to completely prevent double-tap
             if (isWithdrawSubmitting) return;
 
             const btn = document.getElementById('withdraw-btn');
-            const binanceId = document.getElementById('binance-id').value.trim();
-            const amount = parseInt(document.getElementById('withdraw-amount').value);
+            const binanceIdInput = document.getElementById('binance-id');
+            const amountInput = document.getElementById('withdraw-amount');
+
+            const binanceId = binanceIdInput.value.trim();
+            const amount = parseInt(amountInput.value);
 
             if (!binanceId) {
                 alert("Please enter your Binance ID!");
@@ -458,12 +461,17 @@
                 return;
             }
 
-            // Lock request & update button state
+            // 1. Lock state and update UI instantly
             isWithdrawSubmitting = true;
             btn.disabled = true;
-            const originalText = btn.innerText;
             btn.innerText = "Processing...";
 
+            // 2. Cut balance INSTANTLY before network request
+            balance -= amount;
+            localStorage.setItem('bonk_balance', balance);
+            updateUI();
+
+            // 3. Send Request to Backend
             fetch(`${BACKEND_URL}/api/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -472,23 +480,30 @@
             .then(res => res.json())
             .then(data => {
                 if (!data.success) {
+                    // Rollback balance on failure
+                    balance += amount;
+                    localStorage.setItem('bonk_balance', balance);
+                    updateUI();
                     alert("❌ " + data.message);
                     return;
                 }
-                balance -= amount;
-                if (balance < 0) balance = 0;
+                
+                alert("✅ Withdrawal Request Submitted!");
+                binanceIdInput.value = '';
+                amountInput.value = '';
+            })
+            .catch(err => {
+                // Rollback balance on network error
+                balance += amount;
                 localStorage.setItem('bonk_balance', balance);
                 updateUI();
-                alert("✅ Withdrawal Request Submitted!");
-                document.getElementById('binance-id').value = '';
-                document.getElementById('withdraw-amount').value = '';
+                alert("❌ Network Error. Please try again.");
             })
-            .catch(() => alert("Error connecting to server."))
             .finally(() => {
-                // Unlock button after completion
+                // Release lock & restore button state
                 isWithdrawSubmitting = false;
                 btn.disabled = false;
-                btn.innerText = originalText;
+                btn.innerText = "Withdraw Now";
             });
         }
 
