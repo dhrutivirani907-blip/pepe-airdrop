@@ -33,7 +33,7 @@
         .container {
             padding: 16px;
             flex: 1;
-            margin-bottom: 60px;
+            margin-bottom: 70px;
         }
 
         .balance-card {
@@ -75,13 +75,14 @@
         .stat-val { font-size: 18px; font-weight: bold; }
         .stat-lbl { font-size: 10px; text-transform: uppercase; opacity: 0.8; }
 
+        /* Notice Box Styling */
         .notice-card {
             background-color: var(--warning-bg);
             border: 1px solid var(--warning-border);
             color: var(--warning-text);
             border-radius: 12px;
             padding: 14px;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             font-size: 13px;
             line-height: 1.5;
         }
@@ -95,7 +96,7 @@
         }
 
         .card-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-        .card-desc { font-size: 13px; color: var(--text-muted); }
+        .card-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
 
         .btn {
             background: var(--accent-gradient);
@@ -108,6 +109,7 @@
             width: 100%;
             font-size: 14px;
             margin-top: 8px;
+            box-sizing: border-box;
         }
 
         .btn:disabled {
@@ -146,15 +148,18 @@
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
-            padding: 10px 0;
+            padding: 12px 0;
+            z-index: 1000;
         }
 
         .nav-item {
             color: var(--text-muted);
             text-decoration: none;
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: 600;
             text-align: center;
             cursor: pointer;
+            flex: 1;
         }
 
         .nav-item.active {
@@ -182,7 +187,7 @@
 <body>
 
     <div class="container">
-        <!-- HOME PAGE -->
+        <!-- 1. HOME PAGE -->
         <div id="home-page" class="page active">
             <div class="balance-card">
                 <div class="balance-title">TOTAL BALANCE (PEPE)</div>
@@ -205,39 +210,37 @@
             </div>
         </div>
 
-        <!-- ADS / TASKS PAGE -->
+        <!-- 2. ADS PAGE (ALL ADS BUTTONS AND NOTICE ARE HERE) -->
         <div id="ads-page" class="page">
-            <!-- 1. NOTICE CARD -->
+            <!-- NOTICE BOX -->
             <div class="notice-card">
                 ⚠️ <b>Rule for Reward:</b><br>
-                1. Click <b>"Watch Ad"</b> to open the advertisement.<br>
-                2. You <b>MUST CLICK</b> inside the ad website/page to get verified.<br>
-                3. Return here and click <b>"Click Verification"</b>.<br>
-                4. Once verified, click <b>"Claim 100 PEPE"</b> to get your coins.
+                1. Click <b>"1. Watch Ad"</b> to open advertisement.<br>
+                2. You <b>MUST CLICK</b> inside the ad website to verify your view.<br>
+                3. Return here & click <b>"2. Click Verification"</b>.<br>
+                4. Once verified, click <b>"3. Claim 100 PEPE"</b> to earn coins.
             </div>
 
+            <!-- ADS SECTION CARD -->
             <div class="card">
                 <div class="card-title">Watch Ads & Earn</div>
-                <div class="card-desc">Complete all steps to claim <b>100 PEPE</b> per ad (Limit: 30 Ads/day).</div>
-            </div>
-
-            <!-- BUTTONS FLOW CARD -->
-            <div class="card">
-                <!-- STEP 1: WATCH AD BUTTON -->
+                <div class="card-desc">Watch ads & verify click to earn <b>100 PEPE</b> (Limit: 30 Ads/day).</div>
+                
+                <!-- 1. WATCH AD BUTTON -->
                 <button class="btn" id="watch-btn" onclick="openAdLink()">1. Watch Ad (+100 PEPE)</button>
 
-                <!-- STEP 2: CLICK VERIFICATION BUTTON -->
-                <button class="btn btn-verify" id="verify-btn" onclick="verifyAdClick()" disabled style="margin-top:10px;">2. Click Verification</button>
+                <!-- 2. CLICK VERIFICATION BUTTON -->
+                <button class="btn btn-verify" id="verify-btn" onclick="verifyAdClick()" disabled>2. Click Verification</button>
 
-                <!-- STEP 3: CLAIM REWARD BUTTON -->
-                <button class="btn btn-claim" id="claim-btn" onclick="claimAdReward()" disabled style="margin-top:10px;">3. Claim 100 PEPE</button>
+                <!-- 3. CLAIM REWARD BUTTON -->
+                <button class="btn btn-claim" id="claim-btn" onclick="claimAdReward()" disabled>3. Claim 100 PEPE</button>
 
                 <!-- STATUS MSG -->
                 <div id="ad-status" class="status-badge status-pending" style="display:none;"></div>
             </div>
         </div>
 
-        <!-- WITHDRAW PAGE -->
+        <!-- 3. WITHDRAW PAGE -->
         <div id="withdraw-page" class="page">
             <div class="card">
                 <div class="card-title">Withdraw Funds</div>
@@ -259,7 +262,7 @@
         </div>
     </div>
 
-    <!-- Navigation -->
+    <!-- BOTTOM NAVBAR -->
     <div class="navbar">
         <div class="nav-item active" onclick="switchPage('home-page', this)">HOME</div>
         <div class="nav-item" onclick="switchPage('ads-page', this)">ADS</div>
@@ -276,7 +279,7 @@
         const MAX_DAILY_ADS = 30;
         const AD_REWARD = 100;
 
-        // Monetag direct link / Smartlink yahan daalein
+        // Monetag Smartlink/Directlink URL
         const MONETAG_DIRECT_LINK = "https://example.com"; 
 
         let balance = parseInt(localStorage.getItem('pepe_balance')) || 0;
@@ -284,7 +287,7 @@
         let lastAdDate = localStorage.getItem('pepe_ad_date') || "";
 
         let adOpened = false;
-        let userLeftPage = false; // Checks if user actually opened & clicked inside ad
+        let userLeftPage = false; 
         let isVerified = false;
 
         const today = new Date().toDateString();
@@ -294,7 +297,6 @@
             localStorage.setItem('pepe_ad_date', today);
         }
 
-        // Track if user switched tab / clicked ad page
         window.addEventListener('blur', () => {
             if (adOpened) {
                 userLeftPage = true;
@@ -328,7 +330,6 @@
             userLeftPage = false;
             isVerified = false;
 
-            // Open Ad Link
             if (MONETAG_DIRECT_LINK && MONETAG_DIRECT_LINK !== "https://example.com") {
                 if (tg && tg.openLink) {
                     tg.openLink(MONETAG_DIRECT_LINK);
@@ -339,13 +340,12 @@
                 alert("Opening Advertisement... Please click inside the ad page!");
             }
 
-            // Enable Step 2 Verification Button
             document.getElementById('verify-btn').disabled = false;
             
             const statusBox = document.getElementById('ad-status');
             statusBox.style.display = "block";
             statusBox.className = "status-badge status-pending";
-            statusBox.innerText = "Ad Opened. Please click inside the ad, then click 'Click Verification' below.";
+            statusBox.innerText = "Ad Opened. Click inside ad, then click 'Click Verification' below.";
         }
 
         // STEP 2: VERIFY CLICK
@@ -353,21 +353,20 @@
             const statusBox = document.getElementById('ad-status');
 
             if (!adOpened) {
-                alert("Please click 'Watch Ad' first!");
+                alert("Please click '1. Watch Ad' first!");
                 return;
             }
 
-            // Check if user interacted/opened the ad window
-            if (userLeftPage || true) { // Verifies user ad tab transition
+            if (userLeftPage || true) { 
                 isVerified = true;
                 document.getElementById('claim-btn').disabled = false;
                 document.getElementById('verify-btn').disabled = true;
 
                 statusBox.className = "status-badge status-ready";
-                statusBox.innerText = "✅ Ad Click Verified successfully! Click Claim button now.";
+                statusBox.innerText = "✅ Ad Click Verified successfully! Click Claim button below.";
             } else {
                 statusBox.className = "status-badge status-error";
-                statusBox.innerText = "❌ Ad Click Not Detected! Please click on 'Watch Ad' and interact with the ad page.";
+                statusBox.innerText = "❌ Ad Click Not Detected! Open and click inside the ad.";
                 alert("Verification Failed! You must open and click inside the advertisement page.");
             }
         }
@@ -385,7 +384,6 @@
             localStorage.setItem('pepe_balance', balance);
             localStorage.setItem('pepe_ads_count', adsCount);
 
-            // Reset for next ad
             adOpened = false;
             userLeftPage = false;
             isVerified = false;
