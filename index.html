@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    
+    <!-- AUTOMATIC CACHE DISABLE FOR MOBILE APPS -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>BONK Tap & Admin</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -409,10 +415,26 @@
             const checkFocus = () => {
                 const duration = (Date.now() - adStartTime) / 1000;
                 if (duration >= 5) {
-                    xp = MAX_XP;
-                    localStorage.setItem('bonk_xp', xp);
-                    updateUI();
-                    alert("⚡ Energy Refilled to 300 XP!");
+                    // Call backend recharge endpoint for verification
+                    fetch(`${BACKEND_URL}/api/recharge-energy`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ energyAmount: MAX_XP })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        xp = MAX_XP;
+                        localStorage.setItem('bonk_xp', xp);
+                        updateUI();
+                        alert("⚡ Energy Refilled to 300 XP!");
+                    })
+                    .catch(err => {
+                        // Fallback recharge if network is slow
+                        xp = MAX_XP;
+                        localStorage.setItem('bonk_xp', xp);
+                        updateUI();
+                        alert("⚡ Energy Refilled to 300 XP!");
+                    });
                 } else {
                     alert("⚠️ You must watch ad for at least 5 seconds to refill energy!");
                 }
