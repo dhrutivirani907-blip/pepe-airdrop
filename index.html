@@ -97,6 +97,7 @@
             height: 160px;
             border-radius: 50%;
             object-fit: cover;
+            pointer-events: none; /* Prevents image dragging issue on mobile */
         }
 
         .energy-box {
@@ -231,7 +232,7 @@
             </div>
 
             <div class="tap-area">
-                <div class="coin-btn" onclick="handleTap()">
+                <div class="coin-btn" id="coin-btn" onclick="handleTap()">
                     <img src="assets/bonk.png" alt="BONK" class="coin-img" onerror="this.src='https://cryptologos.cc/logos/bonk1-bonk-logo.png'">
                 </div>
             </div>
@@ -282,7 +283,11 @@
 
     <script>
         const ADSTERRA_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
-        let balance = parseInt(localStorage.getItem('bonk_balance')) || 0;
+        
+        // Parse numbers safely from LocalStorage
+        let balance = parseInt(localStorage.getItem('bonk_balance'));
+        if (isNaN(balance)) balance = 0;
+
         let xp = parseInt(localStorage.getItem('bonk_xp'));
         if (isNaN(xp)) xp = 300;
 
@@ -297,7 +302,9 @@
             document.getElementById('balance-val').innerText = balance.toLocaleString();
             document.getElementById('withdraw-balance-val').innerText = balance.toLocaleString();
             document.getElementById('xp-val').innerText = xp;
-            document.getElementById('xp-fill').style.width = ((xp / 300) * 100) + '%';
+            
+            let fillPercentage = Math.max(0, Math.min(100, (xp / 300) * 100));
+            document.getElementById('xp-fill').style.width = fillPercentage + '%';
 
             const adBtn = document.getElementById('ad-btn');
             if (xp <= 0) {
@@ -311,8 +318,10 @@
             if (xp >= 10) {
                 balance += 1;
                 xp -= 10;
+                
                 localStorage.setItem('bonk_balance', balance);
                 localStorage.setItem('bonk_xp', xp);
+                
                 updateUI();
             } else {
                 alert("Out of Energy! Watch Ad to refill.");
@@ -395,6 +404,7 @@
             .catch(() => alert("Error connecting to server."));
         }
 
+        // Initialize UI on startup
         updateUI();
     </script>
 </body>
