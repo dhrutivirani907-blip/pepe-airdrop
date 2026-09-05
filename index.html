@@ -304,7 +304,7 @@
                     <input type="number" id="withdraw-amount" placeholder="Min 1000">
                 </div>
 
-                <button class="btn" onclick="submitWithdrawal()">Withdraw Now</button>
+                <button id="withdraw-btn" class="btn" onclick="submitWithdrawal()">Withdraw Now</button>
             </div>
         </div>
 
@@ -352,6 +352,7 @@
         if (isNaN(xp)) xp = 300;
 
         let adStartTime = 0;
+        let isWithdrawSubmitting = false; // Prevents double submission
 
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
@@ -438,6 +439,9 @@
         }
 
         function submitWithdrawal() {
+            if (isWithdrawSubmitting) return;
+
+            const btn = document.getElementById('withdraw-btn');
             const binanceId = document.getElementById('binance-id').value.trim();
             const amount = parseInt(document.getElementById('withdraw-amount').value);
 
@@ -453,6 +457,12 @@
                 alert("❌ Insufficient BONK balance!");
                 return;
             }
+
+            // Lock request & update button state
+            isWithdrawSubmitting = true;
+            btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = "Processing...";
 
             fetch(`${BACKEND_URL}/api/withdraw`, {
                 method: 'POST',
@@ -473,7 +483,13 @@
                 document.getElementById('binance-id').value = '';
                 document.getElementById('withdraw-amount').value = '';
             })
-            .catch(() => alert("Error connecting to server."));
+            .catch(() => alert("Error connecting to server."))
+            .finally(() => {
+                // Unlock button after completion
+                isWithdrawSubmitting = false;
+                btn.disabled = false;
+                btn.innerText = originalText;
+            });
         }
 
         // --- ADMIN PANEL FUNCTIONS ---
