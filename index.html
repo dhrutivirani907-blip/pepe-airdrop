@@ -343,7 +343,7 @@
     <div class="navbar" id="main-navbar">
         <div class="nav-item active" id="nav-home" onclick="switchScreen('home-screen', 'nav-home')">HOME</div>
         <div class="nav-item" id="nav-withdraw" onclick="switchScreen('withdraw-screen', 'nav-withdraw')">WITHDRAW</div>
-        <div class="nav-item" id="nav-admin" style="display:none;" onclick="switchScreen('admin-screen', 'nav-admin')">ADMIN</div>
+        <div class="nav-item" id="nav-admin" style="display:none;" onclick="switchScreen('nav-admin')">ADMIN</div>
     </div>
 
     <script>
@@ -357,6 +357,7 @@
         let xp = parseInt(localStorage.getItem('bonk_xp'));
         if (isNaN(xp) || xp > MAX_XP) xp = MAX_XP;
 
+        let isWaitingForAd = false;
         let adStartTime = 0;
         let isWithdrawSubmitting = false;
 
@@ -395,54 +396,62 @@
             }
         }
 
+        // --- AUTOMATIC AUTO-REFILL ON RETURN ---
+        function checkAndProcessRefill() {
+            if (!isWaitingForAd) return;
+
+            const timeSpent = (Date.now() - adStartTime) / 1000;
+            isWaitingForAd = false; // Reset state
+
+            if (timeSpent >= 3) { // User viewed ad for at least 3 seconds
+                xp = MAX_XP;
+                localStorage.setItem('bonk_xp', MAX_XP);
+                updateUI();
+
+                // Backend call in background (Non-blocking)
+                fetch(`${BACKEND_URL}/api/recharge-energy`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ energyAmount: MAX_XP })
+                }).catch(err => console.log('Backend sync error ignored'));
+
+                alert("⚡ Energy Refilled to 300 XP!");
+            } else {
+                alert("⚠️ Please watch the ad for at least 3 seconds to get energy!");
+            }
+        }
+
         function watchAdRefill() {
             if (xp > 0) return;
 
+            isWaitingForAd = true;
             adStartTime = Date.now();
 
             if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
                 window.Telegram.WebApp.openLink(ADSTERRA_LINK);
             } else {
-                const a = document.createElement('a');
-                a.href = ADSTERRA_LINK;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                window.open(ADSTERRA_LINK, '_blank');
             }
-
-            const checkFocus = () => {
-                const duration = (Date.now() - adStartTime) / 1000;
-                if (duration >= 5) {
-                    // Call backend recharge endpoint for verification
-                    fetch(`${BACKEND_URL}/api/recharge-energy`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ energyAmount: MAX_XP })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        xp = MAX_XP;
-                        localStorage.setItem('bonk_xp', xp);
-                        updateUI();
-                        alert("⚡ Energy Refilled to 300 XP!");
-                    })
-                    .catch(err => {
-                        // Fallback recharge if network is slow
-                        xp = MAX_XP;
-                        localStorage.setItem('bonk_xp', xp);
-                        updateUI();
-                        alert("⚡ Energy Refilled to 300 XP!");
-                    });
-                } else {
-                    alert("⚠️ You must watch ad for at least 5 seconds to refill energy!");
-                }
-                window.removeEventListener('focus', checkFocus);
-            };
-
-            window.addEventListener('focus', checkFocus);
         }
+
+        // 1. Mobile Telegram App Activation Listener
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.onEvent('activated', () => {
+                checkAndProcessRefill();
+            });
+        }
+
+        // 2. Standard Mobile Web Visibility Listener
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                checkAndProcessRefill();
+            }
+        });
+
+        // 3. Fallback Window Focus Listener
+        window.addEventListener('focus', () => {
+            checkAndProcessRefill();
+        });
 
         function switchScreen(screenId, navId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
