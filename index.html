@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BONK Tap</title>
+    <title>BONK Tap & Admin</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -14,6 +14,8 @@
             --text-color: #ffffff;
             --text-muted: #c5c6c7;
             --border-color: #2c3540;
+            --green: #28a745;
+            --red: #dc3545;
         }
 
         * {
@@ -97,7 +99,7 @@
             height: 160px;
             border-radius: 50%;
             object-fit: cover;
-            pointer-events: none; /* Prevents image dragging issue on mobile */
+            pointer-events: none;
         }
 
         .energy-box {
@@ -151,6 +153,19 @@
             box-shadow: none;
             cursor: not-allowed;
         }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .btn-approve { background: var(--green); }
+        .btn-reject { background: var(--red); }
 
         .card {
             background: var(--card-bg);
@@ -216,6 +231,26 @@
 
         .screen { display: none; width: 100%; }
         .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+        /* Admin Table Styles */
+        .admin-table {
+            width: 100%;
+            max-width: 500px;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .admin-table th, .admin-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-table th {
+            color: var(--gold);
+            background: #111418;
+        }
     </style>
 </head>
 <body>
@@ -273,18 +308,43 @@
             </div>
         </div>
 
+        <!-- ADMIN PANEL SCREEN -->
+        <div id="admin-screen" class="screen">
+            <div class="balance-header">
+                <div class="balance-title">ADMIN DASHBOARD</div>
+                <div class="balance-amount" style="font-size: 24px;">Withdrawal Requests</div>
+            </div>
+
+            <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 15px;" onclick="fetchWithdrawals()">🔄 Refresh Requests</button>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Binance ID</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="withdrawal-list">
+                    <tr><td colspan="4" style="text-align:center;">Loading requests...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
     <!-- NAVBAR -->
-    <div class="navbar">
+    <div class="navbar" id="main-navbar">
         <div class="nav-item active" id="nav-home" onclick="switchScreen('home-screen', 'nav-home')">HOME</div>
         <div class="nav-item" id="nav-withdraw" onclick="switchScreen('withdraw-screen', 'nav-withdraw')">WITHDRAW</div>
+        <div class="nav-item" id="nav-admin" style="display:none;" onclick="switchScreen('admin-screen', 'nav-admin')">ADMIN</div>
     </div>
 
     <script>
         const ADSTERRA_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
+        const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
         
-        // Parse numbers safely from LocalStorage
         let balance = parseInt(localStorage.getItem('bonk_balance'));
         if (isNaN(balance)) balance = 0;
 
@@ -366,8 +426,15 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
             document.getElementById(screenId).classList.add('active');
-            document.getElementById(navId).classList.add('active');
-            updateUI();
+            if (document.getElementById(navId)) {
+                document.getElementById(navId).classList.add('active');
+            }
+            
+            if (screenId === 'admin-screen') {
+                fetchWithdrawals();
+            } else {
+                updateUI();
+            }
         }
 
         function submitWithdrawal() {
@@ -387,7 +454,7 @@
                 return;
             }
 
-            fetch('https://pepe-backend-wkym.onrender.com/api/withdraw', {
+            fetch(`${BACKEND_URL}/api/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ binanceId, amount })
@@ -404,8 +471,66 @@
             .catch(() => alert("Error connecting to server."));
         }
 
-        // Initialize UI on startup
-        updateUI();
+        // --- ADMIN PANEL FUNCTIONS ---
+        function fetchWithdrawals() {
+            const listElement = document.getElementById('withdrawal-list');
+            listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>`;
+
+            fetch(`${BACKEND_URL}/api/admin/withdrawals`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data || data.length === 0) {
+                    listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">No pending requests found.</td></tr>`;
+                    return;
+                }
+
+                let rowsHtml = '';
+                data.forEach(item => {
+                    rowsHtml += `
+                        <tr>
+                            <td>${item.binanceId}</td>
+                            <td>${item.amount} BONK</td>
+                            <td>${item.status || 'Pending'}</td>
+                            <td>
+                                <button class="btn-sm btn-approve" onclick="updateStatus('${item._id || item.id}', 'Approved')">✓</button>
+                                <button class="btn-sm btn-reject" onclick="updateStatus('${item._id || item.id}', 'Rejected')">✗</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                listElement.innerHTML = rowsHtml;
+            })
+            .catch(err => {
+                listElement.innerHTML = `<tr><td colspan="4" style="text-align:center; color: red;">Failed to load data from backend.</td></tr>`;
+            });
+        }
+
+        function updateStatus(id, newStatus) {
+            fetch(`${BACKEND_URL}/api/admin/withdrawals/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(res => res.json())
+            .then(() => {
+                alert(`Status updated to ${newStatus}`);
+                fetchWithdrawals();
+            })
+            .catch(() => alert("Failed to update status"));
+        }
+
+        // Check URL Parameters on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isAdmin = urlParams.get('admin') === 'true' || window.location.hash === '#admin';
+
+            if (isAdmin) {
+                document.getElementById('nav-admin').style.display = 'block';
+                switchScreen('admin-screen', 'nav-admin');
+            } else {
+                updateUI();
+            }
+        });
     </script>
 </body>
 </html>
