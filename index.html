@@ -1,28 +1,32 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pepe Airdrop</title>
-    <!-- Telegram WebApp SDK -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>BONK Tap</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --border-color: #21262d;
-            --accent-green: #00ff87;
-            --accent-gradient: linear-gradient(135deg, #00b09b, #96c93d);
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --gold: #f3ba2f;
+            --gold-gradient: linear-gradient(135deg, #f3ba2f 0%, #f1a80a 100%);
             --text-color: #ffffff;
-            --text-muted: #8b949e;
-            --warning-bg: #2d2208;
-            --warning-border: #855d10;
-            --warning-text: #e3b341;
+            --text-muted: #c5c6c7;
+            --border-color: #2c3540;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
@@ -31,390 +35,350 @@
         }
 
         .container {
-            padding: 16px;
             flex: 1;
+            padding: 20px;
             margin-bottom: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .balance-card {
-            background: var(--accent-gradient);
-            border-radius: 16px;
-            padding: 20px;
-            color: #000;
-            box-shadow: 0 4px 15px rgba(0, 255, 135, 0.2);
-            margin-bottom: 16px;
+        .balance-header {
+            text-align: center;
+            margin-top: 10px;
         }
 
         .balance-title {
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-muted);
             letter-spacing: 1px;
-            opacity: 0.8;
         }
 
         .balance-amount {
-            font-size: 32px;
+            font-size: 42px;
             font-weight: 800;
-            margin: 10px 0;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            color: var(--gold);
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             gap: 10px;
-            margin-top: 15px;
         }
 
-        .stat-box {
-            background: rgba(0, 0, 0, 0.15);
-            padding: 10px;
-            border-radius: 10px;
+        .tap-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .coin-btn {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #2b2b2b 0%, #111111 100%);
+            border: 4px solid var(--gold);
+            box-shadow: 0 0 30px rgba(243, 186, 47, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.05s ease;
+        }
+
+        .coin-btn:active {
+            transform: scale(0.95);
+        }
+
+        .coin-img {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .energy-box {
+            width: 100%;
+            max-width: 320px;
             text-align: center;
+            margin-bottom: 15px;
         }
 
-        .stat-val { font-size: 18px; font-weight: bold; }
-        .stat-lbl { font-size: 10px; text-transform: uppercase; opacity: 0.8; }
-
-        /* Notice Box Styling */
-        .notice-card {
-            background-color: var(--warning-bg);
-            border: 1px solid var(--warning-border);
-            color: var(--warning-text);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 14px;
-            font-size: 13px;
-            line-height: 1.5;
+        .energy-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 8px;
         }
 
-        .card {
-            background-color: var(--card-bg);
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #1e2022;
+            border-radius: 10px;
+            overflow: hidden;
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
         }
 
-        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-        .card-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+        .progress-fill {
+            height: 100%;
+            width: 100%;
+            background: var(--gold-gradient);
+            transition: width 0.2s;
+        }
 
         .btn {
-            background: var(--accent-gradient);
+            width: 100%;
+            max-width: 320px;
+            padding: 14px;
             border: none;
-            color: #000;
-            padding: 12px 18px;
-            border-radius: 8px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
-            width: 100%;
-            font-size: 14px;
-            margin-top: 8px;
-            box-sizing: border-box;
+            background: var(--gold-gradient);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(243, 186, 47, 0.2);
+            margin-top: 10px;
         }
 
         .btn:disabled {
-            background: #30363d !important;
-            color: #6e7681 !important;
+            background: #2c3540 !important;
+            color: #6c757d !important;
+            box-shadow: none;
             cursor: not-allowed;
-            border: none;
         }
 
-        .btn-verify {
-            background: #238636;
-            color: #ffffff;
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
 
-        .btn-claim {
-            background: #00ff87;
-            color: #000000;
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 6px;
         }
 
         input {
             width: 100%;
-            padding: 12px;
-            background: #0d1117;
+            padding: 14px;
+            background: #111418;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 10px;
             color: #fff;
-            box-sizing: border-box;
-            margin: 8px 0;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--gold);
         }
 
         .navbar {
             position: fixed;
             bottom: 0;
-            width: 100%;
-            background-color: var(--card-bg);
+            left: 0;
+            right: 0;
+            background: #121418;
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
             padding: 12px 0;
-            z-index: 1000;
         }
 
         .nav-item {
             color: var(--text-muted);
-            text-decoration: none;
             font-size: 12px;
             font-weight: 600;
-            text-align: center;
             cursor: pointer;
             flex: 1;
+            text-align: center;
         }
 
         .nav-item.active {
-            color: var(--accent-green);
-            font-weight: bold;
+            color: var(--gold);
         }
 
-        .page { display: none; }
-        .page.active { display: block; }
-
-        .status-badge {
-            display: block;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 10px;
-            text-align: center;
-        }
-        .status-pending { background: #3d2c00; color: #ffc107; }
-        .status-ready { background: #003d19; color: #00ff87; }
-        .status-error { background: #3d0000; color: #ff5555; }
+        .screen { display: none; width: 100%; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- 1. HOME PAGE -->
-        <div id="home-page" class="page active">
-            <div class="balance-card">
-                <div class="balance-title">TOTAL BALANCE (PEPE)</div>
-                <div class="balance-amount" id="user-balance">0</div>
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <div class="stat-val" id="ads-today-home">0/30</div>
-                        <div class="stat-lbl">ADS TODAY</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-val">ACTIVE</div>
-                        <div class="stat-lbl">STATUS</div>
-                    </div>
+        
+        <!-- HOME SCREEN -->
+        <div id="home-screen" class="screen active">
+            <div class="balance-header">
+                <div class="balance-title">BALANCE</div>
+                <div class="balance-amount">
+                    ⚡ <span id="balance-val">0</span>
+                </div>
+            </div>
+
+            <div class="tap-area">
+                <div class="coin-btn" onclick="handleTap()">
+                    <!-- Assets image name: bonk.png -->
+                    <img src="assets/bonk.png" alt="BONK" class="coin-img" onerror="this.src='https://cryptologos.cc/logos/bonk1-bonk-logo.png'">
+                </div>
+            </div>
+
+            <div class="energy-box">
+                <div class="energy-text">⚡ <span id="xp-val">300</span> / 300</div>
+                <div class="progress-bar">
+                    <div id="xp-fill" class="progress-fill" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <button id="ad-btn" class="btn" onclick="watchAdRefill()" disabled>
+                Watch Ads & Full Energy
+            </button>
+        </div>
+
+        <!-- WITHDRAW SCREEN -->
+        <div id="withdraw-screen" class="screen">
+            <div class="balance-header" style="margin-bottom: 20px;">
+                <div class="balance-title">WITHDRAW BALANCE</div>
+                <div class="balance-amount">
+                    <span id="withdraw-balance-val">0</span> BONK
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-title">🎧 Customer Support</div>
-                <div class="card-desc">Need help or facing any issue? Contact support via email at: <b>dhrutivirani9010@gmail.com</b></div>
+                <div class="input-group">
+                    <label>Binance Pay ID / User ID</label>
+                    <input type="text" id="binance-id" placeholder="Enter your Binance ID">
+                </div>
+
+                <div class="input-group">
+                    <label>Amount (Min: 1,000 BONK)</label>
+                    <input type="number" id="withdraw-amount" placeholder="Min 1000">
+                </div>
+
+                <button class="btn" onclick="submitWithdrawal()">Withdraw Now</button>
             </div>
         </div>
 
-        <!-- 2. ADS PAGE (ALL ADS BUTTONS AND NOTICE ARE HERE) -->
-        <div id="ads-page" class="page">
-            <!-- NOTICE BOX -->
-            <div class="notice-card">
-                ⚠️ <b>Rule for Reward:</b><br>
-                1. Click <b>"1. Watch Ad"</b> to open advertisement.<br>
-                2. You <b>MUST CLICK</b> inside the ad website to verify your view.<br>
-                3. Return here & click <b>"2. Click Verification"</b>.<br>
-                4. Once verified, click <b>"3. Claim 100 PEPE"</b> to earn coins.
-            </div>
-
-            <!-- ADS SECTION CARD -->
-            <div class="card">
-                <div class="card-title">Watch Ads & Earn</div>
-                <div class="card-desc">Watch ads & verify click to earn <b>100 PEPE</b> (Limit: 30 Ads/day).</div>
-                
-                <!-- 1. WATCH AD BUTTON -->
-                <button class="btn" id="watch-btn" onclick="openAdLink()">1. Watch Ad (+100 PEPE)</button>
-
-                <!-- 2. CLICK VERIFICATION BUTTON -->
-                <button class="btn btn-verify" id="verify-btn" onclick="verifyAdClick()" disabled>2. Click Verification</button>
-
-                <!-- 3. CLAIM REWARD BUTTON -->
-                <button class="btn btn-claim" id="claim-btn" onclick="claimAdReward()" disabled>3. Claim 100 PEPE</button>
-
-                <!-- STATUS MSG -->
-                <div id="ad-status" class="status-badge status-pending" style="display:none;"></div>
-            </div>
-        </div>
-
-        <!-- 3. WITHDRAW PAGE -->
-        <div id="withdraw-page" class="page">
-            <div class="card">
-                <div class="card-title">Withdraw Funds</div>
-                <div class="card-desc">Payouts are sent to your Binance ETH (PEPE) Wallet.</div>
-                
-                <label style="font-size:12px; margin-top:10px; display:block;">Amount (Min: 10,000 PEPE)</label>
-                <input type="number" id="withdraw-amount" placeholder="Min 10,000 PEPE">
-
-                <label style="font-size:12px; display:block;">Binance ETH Network PEPE Address</label>
-                <input type="text" id="withdraw-address" placeholder="0x...">
-
-                <button class="btn" style="width:100%; margin-top:10px;" onclick="submitWithdrawal()">Submit Request</button>
-            </div>
-
-            <div class="card">
-                <div class="card-title">Recent Withdrawals</div>
-                <div id="withdraw-history" class="card-desc">No requests yet.</div>
-            </div>
-        </div>
     </div>
 
-    <!-- BOTTOM NAVBAR -->
+    <!-- NAVBAR -->
     <div class="navbar">
-        <div class="nav-item active" onclick="switchPage('home-page', this)">HOME</div>
-        <div class="nav-item" onclick="switchPage('ads-page', this)">ADS</div>
-        <div class="nav-item" onclick="switchPage('withdraw-page', this)">WITHDRAW</div>
+        <div class="nav-item active" id="nav-home" onclick="switchScreen('home-screen', 'nav-home')">HOME</div>
+        <div class="nav-item" id="nav-withdraw" onclick="switchScreen('withdraw-screen', 'nav-withdraw')">WITHDRAW</div>
     </div>
 
     <script>
-        const tg = window.Telegram?.WebApp;
-        if (tg) {
-            tg.ready();
-            tg.expand();
-        }
+        const ADSTERRA_LINK = "https://www.google.com"; // Yaha apni Adsterra direct link dalein
 
-        const MAX_DAILY_ADS = 30;
-        const AD_REWARD = 100;
+        let balance = parseInt(localStorage.getItem('bonk_balance')) || 0;
+        let xp = parseInt(localStorage.getItem('bonk_xp'));
+        if (isNaN(xp)) xp = 300;
 
-        // Monetag Smartlink/Directlink URL
-        const MONETAG_DIRECT_LINK = "https://example.com"; 
-
-        let balance = parseInt(localStorage.getItem('pepe_balance')) || 0;
-        let adsCount = parseInt(localStorage.getItem('pepe_ads_count')) || 0;
-        let lastAdDate = localStorage.getItem('pepe_ad_date') || "";
-
-        let adOpened = false;
-        let userLeftPage = false; 
-        let isVerified = false;
-
-        const today = new Date().toDateString();
-        if (lastAdDate !== today) {
-            adsCount = 0;
-            localStorage.setItem('pepe_ads_count', 0);
-            localStorage.setItem('pepe_ad_date', today);
-        }
-
-        window.addEventListener('blur', () => {
-            if (adOpened) {
-                userLeftPage = true;
-            }
-        });
+        let adStartTime = 0;
 
         function updateUI() {
-            document.getElementById('user-balance').innerText = balance.toLocaleString();
-            document.getElementById('ads-today-home').innerText = adsCount + "/" + MAX_DAILY_ADS;
-            
-            const watchBtn = document.getElementById('watch-btn');
-            if (adsCount >= MAX_DAILY_ADS) {
-                watchBtn.disabled = true;
-                watchBtn.innerText = "Daily Limit Reached (30/30)";
+            document.getElementById('balance-val').innerText = balance.toLocaleString();
+            document.getElementById('withdraw-balance-val').innerText = balance.toLocaleString();
+            document.getElementById('xp-val').innerText = xp;
+            document.getElementById('xp-fill').style.width = ((xp / 300) * 100) + '%';
+
+            const adBtn = document.getElementById('ad-btn');
+            if (xp <= 0) {
+                adBtn.disabled = false;
+            } else {
+                adBtn.disabled = true;
             }
         }
 
-        function switchPage(pageId, element) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            element.classList.add('active');
-            updateUI();
+        function handleTap() {
+            if (xp >= 10) {
+                balance += 1;
+                xp -= 10;
+                localStorage.setItem('bonk_balance', balance);
+                localStorage.setItem('bonk_xp', xp);
+                updateUI();
+            } else {
+                alert("Out of Energy! Watch Ad to refill.");
+            }
         }
 
-        // STEP 1: OPEN AD
-        function openAdLink() {
-            if (adsCount >= MAX_DAILY_ADS) return alert("Daily limit reached!");
+        function watchAdRefill() {
+            if (xp > 0) return;
 
-            adOpened = true;
-            userLeftPage = false;
-            isVerified = false;
+            adStartTime = Date.now();
+            window.open(ADSTERRA_LINK, '_blank');
 
-            if (MONETAG_DIRECT_LINK && MONETAG_DIRECT_LINK !== "https://example.com") {
-                if (tg && tg.openLink) {
-                    tg.openLink(MONETAG_DIRECT_LINK);
+            // Timer check logic when user returns
+            const checkFocus = () => {
+                const duration = (Date.now() - adStartTime) / 1000;
+                if (duration >= 5) {
+                    xp = 300;
+                    localStorage.setItem('bonk_xp', xp);
+                    updateUI();
+                    alert("⚡ Energy Refilled to 300 XP!");
                 } else {
-                    window.open(MONETAG_DIRECT_LINK, '_blank');
+                    alert("⚠️ You must watch ad for at least 5 seconds to refill energy!");
                 }
-            } else {
-                alert("Opening Advertisement... Please click inside the ad page!");
-            }
+                window.removeEventListener('focus', checkFocus);
+            };
 
-            document.getElementById('verify-btn').disabled = false;
-            
-            const statusBox = document.getElementById('ad-status');
-            statusBox.style.display = "block";
-            statusBox.className = "status-badge status-pending";
-            statusBox.innerText = "Ad Opened. Click inside ad, then click 'Click Verification' below.";
+            window.addEventListener('focus', checkFocus);
         }
 
-        // STEP 2: VERIFY CLICK
-        function verifyAdClick() {
-            const statusBox = document.getElementById('ad-status');
+        function switchScreen(screenId, navId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-            if (!adOpened) {
-                alert("Please click '1. Watch Ad' first!");
-                return;
-            }
-
-            if (userLeftPage || true) { 
-                isVerified = true;
-                document.getElementById('claim-btn').disabled = false;
-                document.getElementById('verify-btn').disabled = true;
-
-                statusBox.className = "status-badge status-ready";
-                statusBox.innerText = "✅ Ad Click Verified successfully! Click Claim button below.";
-            } else {
-                statusBox.className = "status-badge status-error";
-                statusBox.innerText = "❌ Ad Click Not Detected! Open and click inside the ad.";
-                alert("Verification Failed! You must open and click inside the advertisement page.");
-            }
-        }
-
-        // STEP 3: CLAIM REWARD
-        function claimAdReward() {
-            if (!isVerified) {
-                alert("Please verify your ad click first!");
-                return;
-            }
-
-            balance += AD_REWARD;
-            adsCount += 1;
-
-            localStorage.setItem('pepe_balance', balance);
-            localStorage.setItem('pepe_ads_count', adsCount);
-
-            adOpened = false;
-            userLeftPage = false;
-            isVerified = false;
-
-            document.getElementById('verify-btn').disabled = true;
-            document.getElementById('claim-btn').disabled = true;
-            document.getElementById('ad-status').style.display = "none";
-
-            alert(`🎉 Success! You earned ${AD_REWARD} PEPE!`);
+            document.getElementById(screenId).classList.add('active');
+            document.getElementById(navId).classList.add('active');
             updateUI();
         }
 
         function submitWithdrawal() {
+            const binanceId = document.getElementById('binance-id').value.trim();
             const amount = parseInt(document.getElementById('withdraw-amount').value);
-            const address = document.getElementById('withdraw-address').value;
 
-            if (!amount || amount < 10000) return alert("Minimum withdrawal is 10,000 PEPE!");
-            if (amount > balance) return alert("Insufficient balance!");
-            if (!address || !address.startsWith("0x") || address.length < 20) return alert("Invalid ETH Network PEPE Address!");
+            if (!binanceId) {
+                alert("Please enter your Binance ID!");
+                return;
+            }
+            if (!amount || amount < 1000) {
+                alert("Minimum withdrawal is 1,000 BONK!");
+                return;
+            }
+            if (amount > balance) {
+                alert("Insufficient BONK balance!");
+                return;
+            }
 
             fetch('https://pepe-backend-wkym.onrender.com/api/withdraw', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount, address })
+                body: JSON.stringify({ binanceId, amount })
             })
             .then(res => res.json())
             .then(() => {
                 balance -= amount;
-                localStorage.setItem('pepe_balance', balance);
+                localStorage.setItem('bonk_balance', balance);
                 updateUI();
-                alert("Withdrawal Request Submitted!");
+                alert("✅ Withdrawal Request Submitted!");
+                document.getElementById('binance-id').value = '';
+                document.getElementById('withdraw-amount').value = '';
             })
             .catch(() => alert("Error connecting to server."));
         }
