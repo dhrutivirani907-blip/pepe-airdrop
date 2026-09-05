@@ -272,7 +272,7 @@
             </div>
 
             <div class="energy-box">
-                <div class="energy-text">⚡ <span id="xp-val">300</span> / 300</div>
+                <div class="energy-text">⚡ <span id="xp-val">1000</span> / 1000</div>
                 <div class="progress-bar">
                     <div id="xp-fill" class="progress-fill" style="width: 100%;"></div>
                 </div>
@@ -343,12 +343,13 @@
     <script>
         const ADSTERRA_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
+        const MAX_XP = 1000;
         
         let balance = parseInt(localStorage.getItem('bonk_balance'));
         if (isNaN(balance) || balance < 0) balance = 0;
 
         let xp = parseInt(localStorage.getItem('bonk_xp'));
-        if (isNaN(xp)) xp = 300;
+        if (isNaN(xp) || xp > MAX_XP) xp = MAX_XP;
 
         let adStartTime = 0;
         let isWithdrawSubmitting = false;
@@ -363,7 +364,7 @@
             document.getElementById('withdraw-balance-val').innerText = balance.toLocaleString();
             document.getElementById('xp-val').innerText = xp;
             
-            let fillPercentage = Math.max(0, Math.min(100, (xp / 300) * 100));
+            let fillPercentage = Math.max(0, Math.min(100, (xp / MAX_XP) * 100));
             document.getElementById('xp-fill').style.width = fillPercentage + '%';
 
             const adBtn = document.getElementById('ad-btn');
@@ -375,9 +376,9 @@
         }
 
         function handleTap() {
-            if (xp >= 10) {
+            if (xp >= 1) {
                 balance += 1;
-                xp -= 10;
+                xp -= 1;
                 
                 localStorage.setItem('bonk_balance', balance);
                 localStorage.setItem('bonk_xp', xp);
@@ -408,10 +409,10 @@
             const checkFocus = () => {
                 const duration = (Date.now() - adStartTime) / 1000;
                 if (duration >= 5) {
-                    xp = 300;
+                    xp = MAX_XP;
                     localStorage.setItem('bonk_xp', xp);
                     updateUI();
-                    alert("⚡ Energy Refilled to 300 XP!");
+                    alert("⚡ Energy Refilled to 1000 XP!");
                 } else {
                     alert("⚠️ You must watch ad for at least 5 seconds to refill energy!");
                 }
@@ -438,7 +439,6 @@
         }
 
         function submitWithdrawal() {
-            // Strict check to completely prevent double-tap
             if (isWithdrawSubmitting) return;
 
             const btn = document.getElementById('withdraw-btn');
@@ -461,17 +461,14 @@
                 return;
             }
 
-            // 1. Lock state and update UI instantly
             isWithdrawSubmitting = true;
             btn.disabled = true;
             btn.innerText = "Processing...";
 
-            // 2. Cut balance INSTANTLY before network request
             balance -= amount;
             localStorage.setItem('bonk_balance', balance);
             updateUI();
 
-            // 3. Send Request to Backend
             fetch(`${BACKEND_URL}/api/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -480,7 +477,6 @@
             .then(res => res.json())
             .then(data => {
                 if (!data.success) {
-                    // Rollback balance on failure
                     balance += amount;
                     localStorage.setItem('bonk_balance', balance);
                     updateUI();
@@ -493,14 +489,12 @@
                 amountInput.value = '';
             })
             .catch(err => {
-                // Rollback balance on network error
                 balance += amount;
                 localStorage.setItem('bonk_balance', balance);
                 updateUI();
                 alert("❌ Network Error. Please try again.");
             })
             .finally(() => {
-                // Release lock & restore button state
                 isWithdrawSubmitting = false;
                 btn.disabled = false;
                 btn.innerText = "Withdraw Now";
@@ -559,7 +553,6 @@
             .catch(() => alert("Failed to update status"));
         }
 
-        // Check URL Parameters on Load
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const isAdmin = urlParams.get('admin') === 'true' || window.location.hash === '#admin';
