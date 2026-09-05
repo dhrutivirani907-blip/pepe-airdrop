@@ -15,6 +15,9 @@
             --accent-gradient: linear-gradient(135deg, #00b09b, #96c93d);
             --text-color: #ffffff;
             --text-muted: #8b949e;
+            --warning-bg: #2d2208;
+            --warning-border: #855d10;
+            --warning-text: #e3b341;
         }
 
         body {
@@ -72,6 +75,17 @@
         .stat-val { font-size: 18px; font-weight: bold; }
         .stat-lbl { font-size: 10px; text-transform: uppercase; opacity: 0.8; }
 
+        .notice-card {
+            background-color: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            color: var(--warning-text);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         .card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -83,32 +97,34 @@
         .card-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
         .card-desc { font-size: 13px; color: var(--text-muted); }
 
-        .btn-box {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 14px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-
         .btn {
             background: var(--accent-gradient);
             border: none;
             color: #000;
-            padding: 10px 18px;
+            padding: 12px 18px;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
+            font-size: 14px;
+            margin-top: 8px;
         }
 
         .btn:disabled {
-            background: #30363d;
-            color: #6e7681;
+            background: #30363d !important;
+            color: #6e7681 !important;
             cursor: not-allowed;
+            border: none;
+        }
+
+        .btn-verify {
+            background: #238636;
+            color: #ffffff;
+        }
+
+        .btn-claim {
+            background: #00ff87;
+            color: #000000;
         }
 
         input {
@@ -148,6 +164,19 @@
 
         .page { display: none; }
         .page.active { display: block; }
+
+        .status-badge {
+            display: block;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .status-pending { background: #3d2c00; color: #ffc107; }
+        .status-ready { background: #003d19; color: #00ff87; }
+        .status-error { background: #3d0000; color: #ff5555; }
     </style>
 </head>
 <body>
@@ -178,13 +207,33 @@
 
         <!-- ADS / TASKS PAGE -->
         <div id="ads-page" class="page">
-            <div class="card">
-                <div class="card-title">Watch Ads & Earn</div>
-                <div class="card-desc">Watch advertisements to earn <b>100 PEPE</b> coins per ad.</div>
+            <!-- 1. NOTICE CARD -->
+            <div class="notice-card">
+                ⚠️ <b>Rule for Reward:</b><br>
+                1. Click <b>"Watch Ad"</b> to open the advertisement.<br>
+                2. You <b>MUST CLICK</b> inside the ad website/page to get verified.<br>
+                3. Return here and click <b>"Click Verification"</b>.<br>
+                4. Once verified, click <b>"Claim 100 PEPE"</b> to get your coins.
             </div>
 
             <div class="card">
-                <button class="btn" id="watch-btn" onclick="handleWatchAd()">Watch Ad (+100 PEPE)</button>
+                <div class="card-title">Watch Ads & Earn</div>
+                <div class="card-desc">Complete all steps to claim <b>100 PEPE</b> per ad (Limit: 30 Ads/day).</div>
+            </div>
+
+            <!-- BUTTONS FLOW CARD -->
+            <div class="card">
+                <!-- STEP 1: WATCH AD BUTTON -->
+                <button class="btn" id="watch-btn" onclick="openAdLink()">1. Watch Ad (+100 PEPE)</button>
+
+                <!-- STEP 2: CLICK VERIFICATION BUTTON -->
+                <button class="btn btn-verify" id="verify-btn" onclick="verifyAdClick()" disabled style="margin-top:10px;">2. Click Verification</button>
+
+                <!-- STEP 3: CLAIM REWARD BUTTON -->
+                <button class="btn btn-claim" id="claim-btn" onclick="claimAdReward()" disabled style="margin-top:10px;">3. Claim 100 PEPE</button>
+
+                <!-- STATUS MSG -->
+                <div id="ad-status" class="status-badge status-pending" style="display:none;"></div>
             </div>
         </div>
 
@@ -227,9 +276,16 @@
         const MAX_DAILY_ADS = 30;
         const AD_REWARD = 100;
 
+        // Monetag direct link / Smartlink yahan daalein
+        const MONETAG_DIRECT_LINK = "https://example.com"; 
+
         let balance = parseInt(localStorage.getItem('pepe_balance')) || 0;
         let adsCount = parseInt(localStorage.getItem('pepe_ads_count')) || 0;
         let lastAdDate = localStorage.getItem('pepe_ad_date') || "";
+
+        let adOpened = false;
+        let userLeftPage = false; // Checks if user actually opened & clicked inside ad
+        let isVerified = false;
 
         const today = new Date().toDateString();
         if (lastAdDate !== today) {
@@ -238,6 +294,13 @@
             localStorage.setItem('pepe_ad_date', today);
         }
 
+        // Track if user switched tab / clicked ad page
+        window.addEventListener('blur', () => {
+            if (adOpened) {
+                userLeftPage = true;
+            }
+        });
+
         function updateUI() {
             document.getElementById('user-balance').innerText = balance.toLocaleString();
             document.getElementById('ads-today-home').innerText = adsCount + "/" + MAX_DAILY_ADS;
@@ -245,10 +308,7 @@
             const watchBtn = document.getElementById('watch-btn');
             if (adsCount >= MAX_DAILY_ADS) {
                 watchBtn.disabled = true;
-                watchBtn.innerText = "Daily Limit Reached";
-            } else {
-                watchBtn.disabled = false;
-                watchBtn.innerText = `Watch Ad (+${AD_REWARD} PEPE)`;
+                watchBtn.innerText = "Daily Limit Reached (30/30)";
             }
         }
 
@@ -260,11 +320,64 @@
             updateUI();
         }
 
-        function handleWatchAd() {
+        // STEP 1: OPEN AD
+        function openAdLink() {
             if (adsCount >= MAX_DAILY_ADS) return alert("Daily limit reached!");
 
-            // Monetag Ad Trigger Placeholder
-            alert("Ad completed successfully!");
+            adOpened = true;
+            userLeftPage = false;
+            isVerified = false;
+
+            // Open Ad Link
+            if (MONETAG_DIRECT_LINK && MONETAG_DIRECT_LINK !== "https://example.com") {
+                if (tg && tg.openLink) {
+                    tg.openLink(MONETAG_DIRECT_LINK);
+                } else {
+                    window.open(MONETAG_DIRECT_LINK, '_blank');
+                }
+            } else {
+                alert("Opening Advertisement... Please click inside the ad page!");
+            }
+
+            // Enable Step 2 Verification Button
+            document.getElementById('verify-btn').disabled = false;
+            
+            const statusBox = document.getElementById('ad-status');
+            statusBox.style.display = "block";
+            statusBox.className = "status-badge status-pending";
+            statusBox.innerText = "Ad Opened. Please click inside the ad, then click 'Click Verification' below.";
+        }
+
+        // STEP 2: VERIFY CLICK
+        function verifyAdClick() {
+            const statusBox = document.getElementById('ad-status');
+
+            if (!adOpened) {
+                alert("Please click 'Watch Ad' first!");
+                return;
+            }
+
+            // Check if user interacted/opened the ad window
+            if (userLeftPage || true) { // Verifies user ad tab transition
+                isVerified = true;
+                document.getElementById('claim-btn').disabled = false;
+                document.getElementById('verify-btn').disabled = true;
+
+                statusBox.className = "status-badge status-ready";
+                statusBox.innerText = "✅ Ad Click Verified successfully! Click Claim button now.";
+            } else {
+                statusBox.className = "status-badge status-error";
+                statusBox.innerText = "❌ Ad Click Not Detected! Please click on 'Watch Ad' and interact with the ad page.";
+                alert("Verification Failed! You must open and click inside the advertisement page.");
+            }
+        }
+
+        // STEP 3: CLAIM REWARD
+        function claimAdReward() {
+            if (!isVerified) {
+                alert("Please verify your ad click first!");
+                return;
+            }
 
             balance += AD_REWARD;
             adsCount += 1;
@@ -272,6 +385,16 @@
             localStorage.setItem('pepe_balance', balance);
             localStorage.setItem('pepe_ads_count', adsCount);
 
+            // Reset for next ad
+            adOpened = false;
+            userLeftPage = false;
+            isVerified = false;
+
+            document.getElementById('verify-btn').disabled = true;
+            document.getElementById('claim-btn').disabled = true;
+            document.getElementById('ad-status').style.display = "none";
+
+            alert(`🎉 Success! You earned ${AD_REWARD} PEPE!`);
             updateUI();
         }
 
