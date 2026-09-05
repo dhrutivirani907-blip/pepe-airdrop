@@ -346,7 +346,7 @@
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
         
         let balance = parseInt(localStorage.getItem('bonk_balance'));
-        if (isNaN(balance)) balance = 0;
+        if (isNaN(balance) || balance < 0) balance = 0;
 
         let xp = parseInt(localStorage.getItem('bonk_xp'));
         if (isNaN(xp)) xp = 300;
@@ -445,23 +445,28 @@
                 alert("Please enter your Binance ID!");
                 return;
             }
-            if (!amount || amount < 1000) {
+            if (isNaN(amount) || amount < 1000) {
                 alert("Minimum withdrawal is 1,000 BONK!");
                 return;
             }
-            if (amount > balance) {
-                alert("Insufficient BONK balance!");
+            if (balance <= 0 || amount > balance) {
+                alert("❌ Insufficient BONK balance!");
                 return;
             }
 
             fetch(`${BACKEND_URL}/api/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ binanceId, amount })
+                body: JSON.stringify({ binanceId, amount, currentBalance: balance })
             })
             .then(res => res.json())
-            .then(() => {
+            .then(data => {
+                if (!data.success) {
+                    alert("❌ " + data.message);
+                    return;
+                }
                 balance -= amount;
+                if (balance < 0) balance = 0;
                 localStorage.setItem('bonk_balance', balance);
                 updateUI();
                 alert("✅ Withdrawal Request Submitted!");
