@@ -272,7 +272,7 @@
             </div>
 
             <div class="energy-box">
-                <div class="energy-text">⚡ <span id="xp-val">1000</span> / 1000</div>
+                <div class="energy-text">⚡ <span id="xp-val">300</span> / 300</div>
                 <div class="progress-bar">
                     <div id="xp-fill" class="progress-fill" style="width: 100%;"></div>
                 </div>
@@ -343,7 +343,7 @@
     <script>
         const ADSTERRA_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
-        const MAX_XP = 1000;
+        const MAX_XP = 300;
         
         let balance = parseInt(localStorage.getItem('bonk_balance'));
         if (isNaN(balance) || balance < 0) balance = 0;
@@ -376,9 +376,9 @@
         }
 
         function handleTap() {
-            if (xp >= 1) {
+            if (xp >= 10) {
                 balance += 1;
-                xp -= 1;
+                xp -= 10;
                 
                 localStorage.setItem('bonk_balance', balance);
                 localStorage.setItem('bonk_xp', xp);
@@ -412,7 +412,7 @@
                     xp = MAX_XP;
                     localStorage.setItem('bonk_xp', xp);
                     updateUI();
-                    alert("⚡ Energy Refilled to 1000 XP!");
+                    alert("⚡ Energy Refilled to 300 XP!");
                 } else {
                     alert("⚠️ You must watch ad for at least 5 seconds to refill energy!");
                 }
