@@ -281,14 +281,13 @@
     </div>
 
     <script>
-        const ADSTERRA_LINK = https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d
+        const ADSTERRA_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
         let balance = parseInt(localStorage.getItem('bonk_balance')) || 0;
         let xp = parseInt(localStorage.getItem('bonk_xp'));
         if (isNaN(xp)) xp = 300;
 
         let adStartTime = 0;
 
-        // Initialize Telegram Web App SDK
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
@@ -325,14 +324,18 @@
 
             adStartTime = Date.now();
 
-            // Native Telegram link opener or fallbacks
             if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
                 window.Telegram.WebApp.openLink(ADSTERRA_LINK);
             } else {
-                window.open(ADSTERRA_LINK, '_blank');
+                const a = document.createElement('a');
+                a.href = ADSTERRA_LINK;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
             }
 
-            // Timer check logic when user returns
             const checkFocus = () => {
                 const duration = (Date.now() - adStartTime) / 1000;
                 if (duration >= 5) {
