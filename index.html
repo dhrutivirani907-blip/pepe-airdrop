@@ -477,7 +477,10 @@
             listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>`;
 
             fetch(`${BACKEND_URL}/api/withdrawals`)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("HTTP error " + res.status);
+                return res.json();
+            })
             .then(data => {
                 if (!data || data.length === 0) {
                     listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">No pending requests found.</td></tr>`;
@@ -501,12 +504,13 @@
                 listElement.innerHTML = rowsHtml;
             })
             .catch(err => {
+                console.error(err);
                 listElement.innerHTML = `<tr><td colspan="4" style="text-align:center; color: red;">Failed to load data from backend.</td></tr>`;
             });
         }
 
         function updateStatus(id, newStatus) {
-            fetch(`${BACKEND_URL}/api/admin/withdrawals/${id}`, {
+            fetch(`${BACKEND_URL}/api/withdrawals/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus })
