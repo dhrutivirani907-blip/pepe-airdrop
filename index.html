@@ -22,6 +22,7 @@
             --border-color: #2c3540;
             --green: #28a745;
             --red: #dc3545;
+            --blue: #0088cc;
         }
 
         * {
@@ -161,17 +162,18 @@
         }
 
         .btn-sm {
-            padding: 8px 12px;
-            font-size: 12px;
-            border-radius: 6px;
+            padding: 8px 14px;
+            font-size: 13px;
+            border-radius: 8px;
             border: none;
             cursor: pointer;
             font-weight: bold;
             color: #fff;
         }
 
+        .btn-start { background: var(--blue); }
         .btn-approve { background: var(--green); }
-        .btn-reject { background: var(--red); }
+        .btn-done { background: #2c3540; color: #6c757d; cursor: not-allowed; }
 
         .card {
             background: var(--card-bg);
@@ -220,6 +222,7 @@
             display: flex;
             justify-content: space-around;
             padding: 12px 0;
+            z-index: 999;
         }
 
         .nav-item {
@@ -332,18 +335,18 @@
             <div class="task-list">
                 <div class="task-card">
                     <div class="task-info">
-                        <h4>Watch Sponsored Video</h4>
+                        <h4>Join MetaCcx Bot</h4>
                         <p>+500 BONK</p>
                     </div>
-                    <button class="btn-sm btn-approve" onclick="completeTask('video', 500)">Claim</button>
+                    <button id="task-btn-video" class="btn-sm btn-start" onclick="handleTaskAction('video', 500, TASK_1_LINK)">Join</button>
                 </div>
                 
                 <div class="task-card">
                     <div class="task-info">
-                        <h4>Visit Partner Link</h4>
+                        <h4>Join SHIBA Inu Bot</h4>
                         <p>+200 BONK</p>
                     </div>
-                    <button class="btn-sm btn-approve" onclick="completeTask('partner', 200)">Claim</button>
+                    <button id="task-btn-partner" class="btn-sm btn-start" onclick="handleTaskAction('partner', 200, TASK_2_LINK)">Join</button>
                 </div>
             </div>
         </div>
@@ -408,6 +411,11 @@
 
     <script>
         const ADSTERRA_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
+        
+        // Custom Referral Links For Tasks
+        const TASK_1_LINK = "https://t.me/MetaCcx_bot?start=1912015558";
+        const TASK_2_LINK = "https://t.me/SHIBAInuTapbot?start=1912015558";
+
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
         const MAX_XP = 300;
         
@@ -440,6 +448,8 @@
             } else {
                 adBtn.disabled = true;
             }
+
+            updateTaskButtons();
         }
 
         function handleTap() {
@@ -456,19 +466,17 @@
             }
         }
 
-        // --- AUTOMATIC AUTO-REFILL ON RETURN ---
         function checkAndProcessRefill() {
             if (!isWaitingForAd) return;
 
             const timeSpent = (Date.now() - adStartTime) / 1000;
-            isWaitingForAd = false; // Reset state
+            isWaitingForAd = false;
 
-            if (timeSpent >= 3) { // User viewed ad for at least 3 seconds
+            if (timeSpent >= 3) {
                 xp = MAX_XP;
                 localStorage.setItem('bonk_xp', MAX_XP);
                 updateUI();
 
-                // Backend call in background (Non-blocking)
                 fetch(`${BACKEND_URL}/api/recharge-energy`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -487,42 +495,73 @@
             isWaitingForAd = true;
             adStartTime = Date.now();
 
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
-                window.Telegram.WebApp.openLink(ADSTERRA_LINK);
+            openExternalLink(ADSTERRA_LINK);
+        }
+
+        // --- TASK LOGIC ---
+        function handleTaskAction(taskId, reward, linkUrl) {
+            const status = localStorage.getItem(`task_status_${taskId}`);
+
+            if (status === 'claimed') {
+                return;
+            }
+
+            if (status === 'visited') {
+                balance += reward;
+                localStorage.setItem('bonk_balance', balance);
+                localStorage.setItem(`task_status_${taskId}`, 'claimed');
+                updateUI();
+                alert(`✅ Task Completed! You received ${reward} BONK.`);
             } else {
-                window.open(ADSTERRA_LINK, '_blank');
+                localStorage.setItem(`task_status_${taskId}`, 'visited');
+                updateTaskButtons();
+                openExternalLink(linkUrl);
             }
         }
 
-        // --- TASK FUNCTION ---
-        function completeTask(taskType, reward) {
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
-                window.Telegram.WebApp.openLink(ADSTERRA_LINK);
-            } else {
-                window.open(ADSTERRA_LINK, '_blank');
-            }
+        function updateTaskButtons() {
+            ['video', 'partner'].forEach(taskId => {
+                const btn = document.getElementById(`task-btn-${taskId}`);
+                if (!btn) return;
 
-            balance += reward;
-            localStorage.setItem('bonk_balance', balance);
-            updateUI();
-            alert(`✅ Task completed! You earned ${reward} BONK.`);
+                const status = localStorage.getItem(`task_status_${taskId}`);
+
+                if (status === 'claimed') {
+                    btn.innerText = 'Claimed ✅';
+                    btn.className = 'btn-sm btn-done';
+                    btn.disabled = true;
+                } else if (status === 'visited') {
+                    btn.innerText = 'Claim';
+                    btn.className = 'btn-sm btn-approve';
+                    btn.disabled = false;
+                } else {
+                    btn.innerText = 'Join';
+                    btn.className = 'btn-sm btn-start';
+                    btn.disabled = false;
+                }
+            });
         }
 
-        // 1. Mobile Telegram App Activation Listener
+        function openExternalLink(url) {
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
+                window.Telegram.WebApp.openLink(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.onEvent('activated', () => {
                 checkAndProcessRefill();
             });
         }
 
-        // 2. Standard Mobile Web Visibility Listener
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 checkAndProcessRefill();
             }
         });
 
-        // 3. Fallback Window Focus Listener
         window.addEventListener('focus', () => {
             checkAndProcessRefill();
         });
@@ -606,7 +645,6 @@
             });
         }
 
-        // --- ADMIN PANEL FUNCTIONS ---
         function fetchWithdrawals() {
             const listElement = document.getElementById('withdrawal-list');
             listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>`;
