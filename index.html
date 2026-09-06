@@ -256,6 +256,39 @@
             color: var(--gold);
             background: #111418;
         }
+
+        /* TASK SECTION STYLING */
+        .task-list {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .task-info p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--gold);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -287,6 +320,32 @@
             <button id="ad-btn" class="btn" onclick="watchAdRefill()" disabled>
                 Watch Ads & Full Energy
             </button>
+        </div>
+
+        <!-- TASKS SCREEN -->
+        <div id="tasks-screen" class="screen">
+            <div class="balance-header" style="margin-bottom: 20px;">
+                <div class="balance-title">EARN EXTRA BONK</div>
+                <div class="balance-amount" style="font-size: 28px;">Complete Tasks</div>
+            </div>
+
+            <div class="task-list">
+                <div class="task-card">
+                    <div class="task-info">
+                        <h4>Watch Sponsored Video</h4>
+                        <p>+500 BONK</p>
+                    </div>
+                    <button class="btn-sm btn-approve" onclick="completeTask('video', 500)">Claim</button>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-info">
+                        <h4>Visit Partner Link</h4>
+                        <p>+200 BONK</p>
+                    </div>
+                    <button class="btn-sm btn-approve" onclick="completeTask('partner', 200)">Claim</button>
+                </div>
+            </div>
         </div>
 
         <!-- WITHDRAW SCREEN -->
@@ -342,8 +401,9 @@
     <!-- NAVBAR -->
     <div class="navbar" id="main-navbar">
         <div class="nav-item active" id="nav-home" onclick="switchScreen('home-screen', 'nav-home')">HOME</div>
+        <div class="nav-item" id="nav-tasks" onclick="switchScreen('tasks-screen', 'nav-tasks')">TASKS</div>
         <div class="nav-item" id="nav-withdraw" onclick="switchScreen('withdraw-screen', 'nav-withdraw')">WITHDRAW</div>
-        <div class="nav-item" id="nav-admin" style="display:none;" onclick="switchScreen('nav-admin')">ADMIN</div>
+        <div class="nav-item" id="nav-admin" style="display:none;" onclick="switchScreen('admin-screen', 'nav-admin')">ADMIN</div>
     </div>
 
     <script>
@@ -432,6 +492,20 @@
             } else {
                 window.open(ADSTERRA_LINK, '_blank');
             }
+        }
+
+        // --- TASK FUNCTION ---
+        function completeTask(taskType, reward) {
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
+                window.Telegram.WebApp.openLink(ADSTERRA_LINK);
+            } else {
+                window.open(ADSTERRA_LINK, '_blank');
+            }
+
+            balance += reward;
+            localStorage.setItem('bonk_balance', balance);
+            updateUI();
+            alert(`✅ Task completed! You earned ${reward} BONK.`);
         }
 
         // 1. Mobile Telegram App Activation Listener
