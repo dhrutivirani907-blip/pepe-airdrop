@@ -333,20 +333,31 @@
             </div>
 
             <div class="task-list">
+                <!-- TASK 1 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Join MetaCcx Bot</h4>
-                        <p>+500 BONK</p>
+                        <p>+200 BONK</p>
                     </div>
-                    <button id="task-btn-video" class="btn-sm btn-start" onclick="handleTaskAction('video', 500, TASK_1_LINK)">Join</button>
+                    <button id="task-btn-video" class="btn-sm btn-start" onclick="handleTaskAction('video', 200, TASK_1_LINK)">Join</button>
                 </div>
                 
+                <!-- TASK 2 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Join SHIBA Inu Bot</h4>
                         <p>+200 BONK</p>
                     </div>
                     <button id="task-btn-partner" class="btn-sm btn-start" onclick="handleTaskAction('partner', 200, TASK_2_LINK)">Join</button>
+                </div>
+
+                <!-- TASK 3 (NEW) -->
+                <div class="task-card">
+                    <div class="task-info">
+                        <h4>Join CryptoPro Up Bot</h4>
+                        <p>+200 BONK</p>
+                    </div>
+                    <button id="task-btn-cryptopro" class="btn-sm btn-start" onclick="handleTaskAction('cryptopro', 200, TASK_3_LINK)">Join</button>
                 </div>
             </div>
         </div>
@@ -415,6 +426,7 @@
         // Custom Referral Links For Tasks
         const TASK_1_LINK = "https://t.me/MetaCcx_bot?start=1912015558";
         const TASK_2_LINK = "https://t.me/SHIBAInuTapbot?start=1912015558";
+        const TASK_3_LINK = "https://t.me/CryptoProUpRobot?start=Bot51728662";
 
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
         const MAX_XP = 300;
@@ -520,7 +532,7 @@
         }
 
         function updateTaskButtons() {
-            ['video', 'partner'].forEach(taskId => {
+            ['video', 'partner', 'cryptopro'].forEach(taskId => {
                 const btn = document.getElementById(`task-btn-${taskId}`);
                 if (!btn) return;
 
