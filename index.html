@@ -173,6 +173,7 @@
 
         .btn-start { background: var(--blue); }
         .btn-approve { background: var(--green); }
+        .btn-reject { background: var(--red); }
         .btn-done { background: #2c3540; color: #6c757d; cursor: not-allowed; }
 
         .card {
@@ -351,7 +352,7 @@
                     <button id="task-btn-partner" class="btn-sm btn-start" onclick="handleTaskAction('partner', 200, TASK_2_LINK)">Join</button>
                 </div>
 
-                <!-- TASK 3 (NEW) -->
+                <!-- TASK 3 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Join CryptoPro Up Bot</h4>
@@ -389,7 +390,7 @@
         <!-- ADMIN PANEL SCREEN -->
         <div id="admin-screen" class="screen">
             <div class="balance-header">
-                <div class="balance-title">ADMIN DASHBOARD</div>
+                <div class="balance-title">BONK ADMIN DASHBOARD</div>
                 <div class="balance-amount" style="font-size: 24px;">Withdrawal Requests</div>
             </div>
 
@@ -489,7 +490,7 @@
                 localStorage.setItem('bonk_xp', MAX_XP);
                 updateUI();
 
-                fetch(`${BACKEND_URL}/api/recharge-energy`, {
+                fetch(`${BACKEND_URL}/api/bonk/recharge-energy`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ energyAmount: MAX_XP })
@@ -625,10 +626,10 @@
             localStorage.setItem('bonk_balance', balance);
             updateUI();
 
-            fetch(`${BACKEND_URL}/api/withdraw`, {
+            fetch(`${BACKEND_URL}/api/bonk/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ binanceId, amount, currentBalance: balance })
+                body: JSON.stringify({ binanceId, amount, tokenType: 'BONK', currentBalance: balance })
             })
             .then(res => res.json())
             .then(data => {
@@ -661,19 +662,22 @@
             const listElement = document.getElementById('withdrawal-list');
             listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>`;
 
-            fetch(`${BACKEND_URL}/api/withdrawals`)
+            fetch(`${BACKEND_URL}/api/bonk/withdrawals`)
             .then(res => {
                 if (!res.ok) throw new Error("HTTP error " + res.status);
                 return res.json();
             })
             .then(data => {
-                if (!data || data.length === 0) {
-                    listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">No pending requests found.</td></tr>`;
+                // Filter out non-BONK records if backend returns combined data
+                const bonkData = Array.isArray(data) ? data.filter(item => !item.tokenType || item.tokenType === 'BONK') : [];
+
+                if (!bonkData || bonkData.length === 0) {
+                    listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">No pending BONK requests found.</td></tr>`;
                     return;
                 }
 
                 let rowsHtml = '';
-                data.forEach(item => {
+                bonkData.forEach(item => {
                     rowsHtml += `
                         <tr>
                             <td>${item.binanceId}</td>
@@ -695,7 +699,7 @@
         }
 
         function updateStatus(id, newStatus) {
-            fetch(`${BACKEND_URL}/api/withdrawals/${id}`, {
+            fetch(`${BACKEND_URL}/api/bonk/withdrawals/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus })
