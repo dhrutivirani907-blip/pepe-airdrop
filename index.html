@@ -265,7 +265,6 @@
             background: #111418;
         }
 
-        /* TASK SECTION STYLING */
         .task-list {
             width: 100%;
             max-width: 360px;
@@ -298,7 +297,6 @@
             font-weight: bold;
         }
 
-        /* MODAL STYLING FOR INSTRUCTIONS */
         .modal {
             display: none;
             position: fixed;
@@ -387,7 +385,6 @@
             </div>
 
             <div class="task-list">
-                <!-- TASK 1 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Join MetaCcx Bot</h4>
@@ -396,7 +393,6 @@
                     <button id="task-btn-video" class="btn-sm btn-start" onclick="handleTaskAction('video', 200, TASK_1_LINK)">Join</button>
                 </div>
                 
-                <!-- TASK 2 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Join SHIBA Inu Bot</h4>
@@ -405,7 +401,6 @@
                     <button id="task-btn-partner" class="btn-sm btn-start" onclick="handleTaskAction('partner', 200, TASK_2_LINK)">Join</button>
                 </div>
 
-                <!-- TASK 3 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Join CryptoPro Up Bot</h4>
@@ -492,7 +487,6 @@
     </div>
 
     <script>
-        // Custom Referral Links For Tasks
         const TASK_1_LINK = "https://t.me/MetaCcx_bot?start=1912015558";
         const TASK_2_LINK = "https://t.me/SHIBAInuTapbot?start=1912015558";
         const TASK_3_LINK = "https://t.me/CryptoProUpRobot?start=Bot51728662";
@@ -506,7 +500,6 @@
         let xp = parseInt(localStorage.getItem('bonk_xp'));
         if (isNaN(xp) || xp > MAX_XP) xp = MAX_XP;
 
-        // Ad Verification Tracker Flags
         let adStartTime = 0;
         let isTrackingAd = false;
         let externalBrowserOpened = false;
@@ -549,7 +542,6 @@
             }
         }
 
-        // Modal Controls
         function openInstructionModal() {
             if (xp > 0) return;
             document.getElementById("instructionModal").style.display = "flex";
@@ -559,14 +551,13 @@
             document.getElementById("instructionModal").style.display = "none";
         }
 
-        // App Departure / Visibility Tracker for Ads Verification
         function handleVisibilityChange() {
             if (!isTrackingAd) return;
 
             const timeElapsed = (Date.now() - adStartTime) / 1000;
 
             if (document.visibilityState === "hidden" || document.hidden) {
-                if (timeElapsed >= 8) { // User spent time before clicking
+                if (timeElapsed >= 8) {
                     externalBrowserOpened = true;
                 }
             }
@@ -590,7 +581,6 @@
             adBtn.disabled = true;
             adBtn.innerText = "⏳ Watching Ad...";
 
-            // Initialize Ad Verification Tracking
             adStartTime = Date.now();
             isTrackingAd = true;
             externalBrowserOpened = false;
@@ -614,21 +604,18 @@
             const totalWatchDuration = (Date.now() - adStartTime) / 1000;
             isTrackingAd = false;
 
-            // Rule 1: Watch duration check (minimum 10 seconds)
             if (totalWatchDuration < 10) {
                 alert("⚠️ Verification Failed!\nAapko kam se kam 10 second ad dekhna zaroori hai.");
                 resetAdButtonState();
                 return;
             }
 
-            // Rule 2: Click Check
             if (!externalBrowserOpened) {
-                alert("⚠️ Click Verification Failed!\nAapne ad par click nahi kiya (Close button dabane par XP nahi milta). Credit paane ke liye ad par CLICK karna zaroori hai.");
+                alert("⚠️ Click Verification Failed!\nAapne ad par click nahi kiya. Credit paane ke liye ad par CLICK karna zaroori hai.");
                 resetAdButtonState();
                 return;
             }
 
-            // Success Reward Allocation (+500 XP)
             xp = MAX_XP;
             localStorage.setItem('bonk_xp', MAX_XP);
             updateUI();
@@ -655,13 +642,10 @@
             }
         }
 
-        // --- TASK LOGIC ---
         function handleTaskAction(taskId, reward, linkUrl) {
             const status = localStorage.getItem(`task_status_${taskId}`);
 
-            if (status === 'claimed') {
-                return;
-            }
+            if (status === 'claimed') return;
 
             if (status === 'visited') {
                 balance += reward;
@@ -786,13 +770,26 @@
             });
         }
 
+        // --- FETCH WITHDRAWALS FIXED METHOD ---
         function fetchWithdrawals() {
             const listElement = document.getElementById('withdrawal-list');
-            listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">Loading...</td></tr>`;
+            listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">⏳ Connecting to Server (waking up backend)...</td></tr>`;
 
-            fetch(`${BACKEND_URL}/api/bonk/withdrawals`)
+            // Timeout controller add kiya hai taaki request hang na ho
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 Seconds Timeout
+
+            fetch(`${BACKEND_URL}/api/bonk/withdrawals`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                signal: controller.signal
+            })
             .then(res => {
-                if (!res.ok) throw new Error("HTTP error " + res.status);
+                clearTimeout(timeoutId);
+                if (!res.ok) throw new Error("HTTP Status " + res.status);
                 return res.json();
             })
             .then(data => {
@@ -820,8 +817,11 @@
                 listElement.innerHTML = rowsHtml;
             })
             .catch(err => {
-                console.error(err);
-                listElement.innerHTML = `<tr><td colspan="4" style="text-align:center; color: red;">Failed to load data from backend.</td></tr>`;
+                console.error("Fetch Error:", err);
+                listElement.innerHTML = `<tr><td colspan="4" style="text-align:center; color: #ff4d4d;">
+                    ⚠️ Connection Failed.<br>
+                    <small style="color:#aaa;">Render server is starting up. Please click "🔄 Refresh Requests" in 10 seconds.</small>
+                </td></tr>`;
             });
         }
 
