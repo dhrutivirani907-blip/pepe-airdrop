@@ -11,6 +11,10 @@
 
     <title>BONK Tap & Admin</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Monetag Rewarded Interstitial SDK -->
+    <script src="//libtl.com/sdk.js" data-zone="11766459" data-sdk="show_11766459"></script>
+
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -293,6 +297,55 @@
             color: var(--gold);
             font-weight: bold;
         }
+
+        /* MODAL STYLING FOR INSTRUCTIONS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #1c1c1e;
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 380px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title { 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #ff3b30; 
+            margin-bottom: 12px; 
+            text-align: center; 
+        }
+
+        .modal-desc { 
+            font-size: 14px; 
+            color: #e5e5ea; 
+            line-height: 1.5; 
+            margin-bottom: 18px; 
+            text-align: left; 
+        }
+
+        .modal-btn {
+            background: var(--gold); 
+            color: black; 
+            border: none; 
+            padding: 12px; 
+            width: 100%;
+            border-radius: 10px; 
+            font-weight: bold; 
+            font-size: 15px; 
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -315,14 +368,14 @@
             </div>
 
             <div class="energy-box">
-                <div class="energy-text">⚡ <span id="xp-val">300</span> / 300</div>
+                <div class="energy-text">⚡ <span id="xp-val">500</span> / 500</div>
                 <div class="progress-bar">
                     <div id="xp-fill" class="progress-fill" style="width: 100%;"></div>
                 </div>
             </div>
 
-            <button id="ad-btn" class="btn" onclick="watchAdRefill()" disabled>
-                Watch Ads & Full Energy
+            <button id="ad-btn" class="btn" onclick="openInstructionModal()" disabled>
+                🎬 Watch Ads & Full Energy (+500 XP)
             </button>
         </div>
 
@@ -413,6 +466,23 @@
 
     </div>
 
+    <!-- Mandatory Instructions Modal Popup -->
+    <div class="modal" id="instructionModal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ Mandatory Rules</div>
+            <div class="modal-desc">
+                To successfully get <b>+500 XP</b>:
+                <br><br>
+                1️⃣ Watch Ad for at least <b>10 seconds</b>.<br>
+                2️⃣ Click anywhere on the Ad / Continue Button to open browser.<br>
+                3️⃣ Return back to the app.
+                <br><br>
+                <i>Note: Closing ad with X button without visiting link = 0 XP.</i>
+            </div>
+            <button class="modal-btn" onclick="startMonetagAd()">UNDERSTOOD & WATCH AD</button>
+        </div>
+    </div>
+
     <!-- NAVBAR -->
     <div class="navbar" id="main-navbar">
         <div class="nav-item active" id="nav-home" onclick="switchScreen('home-screen', 'nav-home')">HOME</div>
@@ -422,15 +492,13 @@
     </div>
 
     <script>
-        const ADSTERRA_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
-        
         // Custom Referral Links For Tasks
         const TASK_1_LINK = "https://t.me/MetaCcx_bot?start=1912015558";
         const TASK_2_LINK = "https://t.me/SHIBAInuTapbot?start=1912015558";
         const TASK_3_LINK = "https://t.me/CryptoProUpRobot?start=Bot51728662";
 
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
-        const MAX_XP = 300;
+        const MAX_XP = 500;
         
         let balance = parseInt(localStorage.getItem('bonk_balance'));
         if (isNaN(balance) || balance < 0) balance = 0;
@@ -438,8 +506,10 @@
         let xp = parseInt(localStorage.getItem('bonk_xp'));
         if (isNaN(xp) || xp > MAX_XP) xp = MAX_XP;
 
-        let isWaitingForAd = false;
+        // Ad Verification Tracker Flags
         let adStartTime = 0;
+        let isTrackingAd = false;
+        let externalBrowserOpened = false;
         let isWithdrawSubmitting = false;
 
         if (window.Telegram && window.Telegram.WebApp) {
@@ -479,36 +549,110 @@
             }
         }
 
-        function checkAndProcessRefill() {
-            if (!isWaitingForAd) return;
+        // Modal Controls
+        function openInstructionModal() {
+            if (xp > 0) return;
+            document.getElementById("instructionModal").style.display = "flex";
+        }
 
-            const timeSpent = (Date.now() - adStartTime) / 1000;
-            isWaitingForAd = false;
+        function closeInstructionModal() {
+            document.getElementById("instructionModal").style.display = "none";
+        }
 
-            if (timeSpent >= 3) {
-                xp = MAX_XP;
-                localStorage.setItem('bonk_xp', MAX_XP);
-                updateUI();
+        // App Departure / Visibility Tracker for Ads Verification
+        function handleVisibilityChange() {
+            if (!isTrackingAd) return;
 
-                fetch(`${BACKEND_URL}/api/bonk/recharge-energy`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ energyAmount: MAX_XP })
-                }).catch(err => console.log('Backend sync error ignored'));
+            const timeElapsed = (Date.now() - adStartTime) / 1000;
 
-                alert("⚡ Energy Refilled to 300 XP!");
-            } else {
-                alert("⚠️ Please watch the ad for at least 3 seconds to get energy!");
+            if (document.visibilityState === "hidden" || document.hidden) {
+                if (timeElapsed >= 8) { // User spent time before clicking
+                    externalBrowserOpened = true;
+                }
             }
         }
 
-        function watchAdRefill() {
-            if (xp > 0) return;
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        window.addEventListener("blur", handleVisibilityChange);
 
-            isWaitingForAd = true;
+        function startMonetagAd() {
+            closeInstructionModal();
+
+            const adTriggerFunction = window.show_11766459 || (typeof show_11766459 === "function" ? show_11766459 : null);
+
+            if (!adTriggerFunction) {
+                alert("⚠️ Ad SDK load nahi hui. Please AdBlocker disable karke check karein.");
+                resetAdButtonState();
+                return;
+            }
+
+            const adBtn = document.getElementById('ad-btn');
+            adBtn.disabled = true;
+            adBtn.innerText = "⏳ Watching Ad...";
+
+            // Initialize Ad Verification Tracking
             adStartTime = Date.now();
+            isTrackingAd = true;
+            externalBrowserOpened = false;
 
-            openExternalLink(ADSTERRA_LINK);
+            try {
+                adTriggerFunction()
+                    .then(() => { 
+                        setTimeout(verifyAdRules, 500); 
+                    })
+                    .catch((err) => {
+                        alert("⚠️ Ad was closed or interrupted.");
+                        resetAdButtonState();
+                    });
+            } catch (err) {
+                alert("⚠️ Could not launch ad.");
+                resetAdButtonState();
+            }
+        }
+
+        function verifyAdRules() {
+            const totalWatchDuration = (Date.now() - adStartTime) / 1000;
+            isTrackingAd = false;
+
+            // Rule 1: Watch duration check (minimum 10 seconds)
+            if (totalWatchDuration < 10) {
+                alert("⚠️ Verification Failed!\nAapko kam se kam 10 second ad dekhna zaroori hai.");
+                resetAdButtonState();
+                return;
+            }
+
+            // Rule 2: Click Check
+            if (!externalBrowserOpened) {
+                alert("⚠️ Click Verification Failed!\nAapne ad par click nahi kiya (Close button dabane par XP nahi milta). Credit paane ke liye ad par CLICK karna zaroori hai.");
+                resetAdButtonState();
+                return;
+            }
+
+            // Success Reward Allocation (+500 XP)
+            xp = MAX_XP;
+            localStorage.setItem('bonk_xp', MAX_XP);
+            updateUI();
+
+            fetch(`${BACKEND_URL}/api/bonk/recharge-energy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ energyAmount: MAX_XP })
+            }).catch(err => console.log('Backend sync error ignored'));
+
+            alert("⚡ Energy Refilled to 500 XP!");
+            resetAdButtonState();
+        }
+
+        function resetAdButtonState() {
+            isTrackingAd = false;
+            externalBrowserOpened = false;
+            const adBtn = document.getElementById('ad-btn');
+            adBtn.innerText = "🎬 Watch Ads & Full Energy (+500 XP)";
+            if (xp <= 0) {
+                adBtn.disabled = false;
+            } else {
+                adBtn.disabled = true;
+            }
         }
 
         // --- TASK LOGIC ---
@@ -562,22 +706,6 @@
                 window.open(url, '_blank');
             }
         }
-
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.onEvent('activated', () => {
-                checkAndProcessRefill();
-            });
-        }
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                checkAndProcessRefill();
-            }
-        });
-
-        window.addEventListener('focus', () => {
-            checkAndProcessRefill();
-        });
 
         function switchScreen(screenId, navId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -668,7 +796,6 @@
                 return res.json();
             })
             .then(data => {
-                // Filter out non-BONK records if backend returns combined data
                 const bonkData = Array.isArray(data) ? data.filter(item => !item.tokenType || item.tokenType === 'BONK') : [];
 
                 if (!bonkData || bonkData.length === 0) {
