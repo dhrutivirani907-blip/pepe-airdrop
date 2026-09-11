@@ -320,7 +320,7 @@
         .modal-title { 
             font-size: 18px; 
             font-weight: bold; 
-            color: #ff3b30; 
+            color: #f3ba2f; 
             margin-bottom: 12px; 
             text-align: center; 
         }
@@ -330,7 +330,7 @@
             color: #e5e5ea; 
             line-height: 1.5; 
             margin-bottom: 18px; 
-            text-align: left; 
+            text-align: center; 
         }
 
         .modal-btn {
@@ -464,15 +464,11 @@
     <!-- Mandatory Instructions Modal Popup -->
     <div class="modal" id="instructionModal">
         <div class="modal-content">
-            <div class="modal-title">⚠️ Mandatory Rules</div>
+            <div class="modal-title">⚡ Refill Energy</div>
             <div class="modal-desc">
                 To successfully get <b>+500 XP</b>:
                 <br><br>
-                1️⃣ Watch Ad for at least <b>10 seconds</b>.<br>
-                2️⃣ Click anywhere on the Ad / Continue Button to open browser.<br>
-                3️⃣ Return back to the app.
-                <br><br>
-                <i>Note: Closing ad with X button without visiting link = 0 XP.</i>
+                Watch Ad for at least <b>10 seconds</b>.
             </div>
             <button class="modal-btn" onclick="startMonetagAd()">UNDERSTOOD & WATCH AD</button>
         </div>
@@ -502,7 +498,6 @@
 
         let adStartTime = 0;
         let isTrackingAd = false;
-        let externalBrowserOpened = false;
         let isWithdrawSubmitting = false;
 
         if (window.Telegram && window.Telegram.WebApp) {
@@ -551,21 +546,6 @@
             document.getElementById("instructionModal").style.display = "none";
         }
 
-        function handleVisibilityChange() {
-            if (!isTrackingAd) return;
-
-            const timeElapsed = (Date.now() - adStartTime) / 1000;
-
-            if (document.visibilityState === "hidden" || document.hidden) {
-                if (timeElapsed >= 8) {
-                    externalBrowserOpened = true;
-                }
-            }
-        }
-
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-        window.addEventListener("blur", handleVisibilityChange);
-
         function startMonetagAd() {
             closeInstructionModal();
 
@@ -583,7 +563,6 @@
 
             adStartTime = Date.now();
             isTrackingAd = true;
-            externalBrowserOpened = false;
 
             try {
                 adTriggerFunction()
@@ -610,12 +589,6 @@
                 return;
             }
 
-            if (!externalBrowserOpened) {
-                alert("⚠️ Click Verification Failed!\nAapne ad par click nahi kiya. Credit paane ke liye ad par CLICK karna zaroori hai.");
-                resetAdButtonState();
-                return;
-            }
-
             xp = MAX_XP;
             localStorage.setItem('bonk_xp', MAX_XP);
             updateUI();
@@ -632,7 +605,6 @@
 
         function resetAdButtonState() {
             isTrackingAd = false;
-            externalBrowserOpened = false;
             const adBtn = document.getElementById('ad-btn');
             adBtn.innerText = "🎬 Watch Ads & Full Energy (+500 XP)";
             if (xp <= 0) {
@@ -775,7 +747,6 @@
             const listElement = document.getElementById('withdrawal-list');
             listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">⏳ Connecting to Server (waking up backend)...</td></tr>`;
 
-            // Timeout controller add kiya hai taaki request hang na ho
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 Seconds Timeout
 
