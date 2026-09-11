@@ -373,7 +373,7 @@
             </div>
 
             <button id="ad-btn" class="btn" onclick="openInstructionModal()" disabled>
-                🎬 Watch Ads & Full Energy (+500 XP)
+                🎬 Watch Ads & Full Energy (+300 XP)
             </button>
         </div>
 
@@ -466,7 +466,7 @@
         <div class="modal-content">
             <div class="modal-title">⚡ Refill Energy</div>
             <div class="modal-desc">
-                To successfully get <b>+500 XP</b>:
+                To successfully get <b>+300 XP</b>:
                 <br><br>
                 Watch Ad for at least <b>10 seconds</b>.
             </div>
@@ -488,7 +488,7 @@
         const TASK_3_LINK = "https://t.me/CryptoProUpRobot?start=Bot51728662";
 
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
-        const MAX_XP = 500;
+       const MAX_XP = 300;
         
         let balance = parseInt(localStorage.getItem('bonk_balance'));
         if (isNaN(balance) || balance < 0) balance = 0;
@@ -599,14 +599,14 @@
                 body: JSON.stringify({ energyAmount: MAX_XP })
             }).catch(err => console.log('Backend sync error ignored'));
 
-            alert("⚡ Energy Refilled to 500 XP!");
+            alert("⚡ Energy Refilled to 300 XP!");
             resetAdButtonState();
         }
 
         function resetAdButtonState() {
             isTrackingAd = false;
             const adBtn = document.getElementById('ad-btn');
-            adBtn.innerText = "🎬 Watch Ads & Full Energy (+500 XP)";
+            adBtn.innerText = "🎬 Watch Ads & Full Energy (+300 XP)";
             if (xp <= 0) {
                 adBtn.disabled = false;
             } else {
