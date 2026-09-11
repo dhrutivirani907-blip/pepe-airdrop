@@ -488,7 +488,7 @@
         const TASK_3_LINK = "https://t.me/CryptoProUpRobot?start=Bot51728662";
 
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
-       const MAX_XP = 300;
+        const MAX_XP = 300;
         
         let balance = parseInt(localStorage.getItem('bonk_balance'));
         if (isNaN(balance) || balance < 0) balance = 0;
@@ -713,7 +713,12 @@
             fetch(`${BACKEND_URL}/api/bonk/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ binanceId, amount, tokenType: 'BONK', currentBalance: balance })
+                body: JSON.stringify({ 
+                    binanceId, 
+                    amount, 
+                    tokenType: 'BONK', // Strictly set token identifier
+                    currentBalance: balance 
+                })
             })
             .then(res => res.json())
             .then(data => {
@@ -742,13 +747,13 @@
             });
         }
 
-        // --- FETCH WITHDRAWALS FIXED METHOD ---
+        // --- FETCH WITHDRAWALS FILTERED FOR BONK ONLY ---
         function fetchWithdrawals() {
             const listElement = document.getElementById('withdrawal-list');
-            listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">⏳ Connecting to Server (waking up backend)...</td></tr>`;
+            listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">⏳ Fetching BONK requests...</td></tr>`;
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 Seconds Timeout
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
 
             fetch(`${BACKEND_URL}/api/bonk/withdrawals`, {
                 method: 'GET',
@@ -764,7 +769,13 @@
                 return res.json();
             })
             .then(data => {
-                const bonkData = Array.isArray(data) ? data.filter(item => !item.tokenType || item.tokenType === 'BONK') : [];
+                // Strict filtering for BONK token requests only
+                const bonkData = Array.isArray(data) 
+                    ? data.filter(item => {
+                        const token = (item.tokenType || item.token_type || 'BONK').toUpperCase();
+                        return token === 'BONK';
+                    }) 
+                    : [];
 
                 if (!bonkData || bonkData.length === 0) {
                     listElement.innerHTML = `<tr><td colspan="4" style="text-align:center;">No pending BONK requests found.</td></tr>`;
@@ -773,14 +784,16 @@
 
                 let rowsHtml = '';
                 bonkData.forEach(item => {
+                    const reqId = item.id || item._id;
+                    const bId = item.binanceId || item.binance_id || 'N/A';
                     rowsHtml += `
                         <tr>
-                            <td>${item.binanceId}</td>
+                            <td>${bId}</td>
                             <td>${item.amount} BONK</td>
                             <td>${item.status || 'Pending'}</td>
                             <td>
-                                <button class="btn-sm btn-approve" onclick="updateStatus('${item._id || item.id}', 'Approved')">✓</button>
-                                <button class="btn-sm btn-reject" onclick="updateStatus('${item._id || item.id}', 'Rejected')">✗</button>
+                                <button class="btn-sm btn-approve" onclick="updateStatus('${reqId}', 'Approved')">✓</button>
+                                <button class="btn-sm btn-reject" onclick="updateStatus('${reqId}', 'Rejected')">✗</button>
                             </td>
                         </tr>
                     `;
@@ -791,7 +804,7 @@
                 console.error("Fetch Error:", err);
                 listElement.innerHTML = `<tr><td colspan="4" style="text-align:center; color: #ff4d4d;">
                     ⚠️ Connection Failed.<br>
-                    <small style="color:#aaa;">Render server is starting up. Please click "🔄 Refresh Requests" in 10 seconds.</small>
+                    <small style="color:#aaa;">Render server is waking up. Click "🔄 Refresh Requests" in 10 seconds.</small>
                 </td></tr>`;
             });
         }
