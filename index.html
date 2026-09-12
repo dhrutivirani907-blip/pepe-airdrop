@@ -410,29 +410,13 @@
                     <button id="task-btn-cryptopro" class="btn-sm btn-start" onclick="handleTaskAction('cryptopro', 200, TASK_3_LINK)">Join</button>
                 </div>
 
-                <!-- Newly Added Tasks -->
+                <!-- Newly Added Task -->
                 <div class="task-card">
                     <div class="task-info">
-                        <h4>Join Telegram Channel</h4>
+                        <h4>Crypto Income</h4>
                         <p>+200 BONK</p>
                     </div>
-                    <button id="task-btn-tgchannel" class="btn-sm btn-start" onclick="handleTaskAction('tgchannel', 200, TASK_4_LINK)">Join</button>
-                </div>
-
-                <div class="task-card">
-                    <div class="task-info">
-                        <h4>Follow Twitter (X)</h4>
-                        <p>+200 BONK</p>
-                    </div>
-                    <button id="task-btn-twitter" class="btn-sm btn-start" onclick="handleTaskAction('twitter', 200, TASK_5_LINK)">Join</button>
-                </div>
-
-                <div class="task-card">
-                    <div class="task-info">
-                        <h4>Subscribe YouTube</h4>
-                        <p>+200 BONK</p>
-                    </div>
-                    <button id="task-btn-youtube" class="btn-sm btn-start" onclick="handleTaskAction('youtube', 200, TASK_6_LINK)">Join</button>
+                    <button id="task-btn-cryptoincome" class="btn-sm btn-start" onclick="handleTaskAction('cryptoincome', 200, TASK_4_LINK)">Join</button>
                 </div>
             </div>
         </div>
@@ -512,10 +496,7 @@
         const TASK_1_LINK = "https://t.me/MetaCcx_bot?start=1912015558";
         const TASK_2_LINK = "https://t.me/SHIBAInuTapbot?start=1912015558";
         const TASK_3_LINK = "https://t.me/CryptoProUpRobot?start=Bot51728662";
-        // Configure new task links here if needed
-        const TASK_4_LINK = "https://t.me/telegram";
-        const TASK_5_LINK = "https://x.com";
-        const TASK_6_LINK = "https://youtube.com";
+        const TASK_4_LINK = "https://t.me/CRYPTO_D_INCOME";
 
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
         const MAX_XP = 300;
@@ -663,7 +644,7 @@
         }
 
         function updateTaskButtons() {
-            ['video', 'partner', 'cryptopro', 'tgchannel', 'twitter', 'youtube'].forEach(taskId => {
+            ['video', 'partner', 'cryptopro', 'cryptoincome'].forEach(taskId => {
                 const btn = document.getElementById(`task-btn-${taskId}`);
                 if (!btn) return;
 
