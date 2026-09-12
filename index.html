@@ -385,7 +385,7 @@
             </div>
 
             <div class="task-list">
-                <!-- Original Tasks -->
+                <!-- Task 1 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Join MetaCcx Bot</h4>
@@ -394,6 +394,7 @@
                     <button id="task-btn-video" class="btn-sm btn-start" onclick="handleTaskAction('video', 200, TASK_1_LINK)">Join</button>
                 </div>
                 
+                <!-- Task 2 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Join SHIBA Inu Bot</h4>
@@ -402,6 +403,7 @@
                     <button id="task-btn-partner" class="btn-sm btn-start" onclick="handleTaskAction('partner', 200, TASK_2_LINK)">Join</button>
                 </div>
 
+                <!-- Task 3 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Join CryptoPro Up Bot</h4>
@@ -410,13 +412,31 @@
                     <button id="task-btn-cryptopro" class="btn-sm btn-start" onclick="handleTaskAction('cryptopro', 200, TASK_3_LINK)">Join</button>
                 </div>
 
-                <!-- Newly Added Task -->
+                <!-- Task 4 (Link Updated) -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Crypto Income</h4>
                         <p>+200 BONK</p>
                     </div>
                     <button id="task-btn-cryptoincome" class="btn-sm btn-start" onclick="handleTaskAction('cryptoincome', 200, TASK_4_LINK)">Join</button>
+                </div>
+
+                <!-- Task 5 (New) -->
+                <div class="task-card">
+                    <div class="task-info">
+                        <h4>Wolf Rush</h4>
+                        <p>+200 BONK</p>
+                    </div>
+                    <button id="task-btn-wolfrush" class="btn-sm btn-start" onclick="handleTaskAction('wolfrush', 200, TASK_5_LINK)">Join</button>
+                </div>
+
+                <!-- Task 6 (New) -->
+                <div class="task-card">
+                    <div class="task-info">
+                        <h4>INSIGHT WITH CRYPTO</h4>
+                        <p>+200 BONK</p>
+                    </div>
+                    <button id="task-btn-cryptoinsight" class="btn-sm btn-start" onclick="handleTaskAction('cryptoinsight', 200, TASK_6_LINK)">Join</button>
                 </div>
             </div>
         </div>
@@ -496,7 +516,9 @@
         const TASK_1_LINK = "https://t.me/MetaCcx_bot?start=1912015558";
         const TASK_2_LINK = "https://t.me/SHIBAInuTapbot?start=1912015558";
         const TASK_3_LINK = "https://t.me/CryptoProUpRobot?start=Bot51728662";
-        const TASK_4_LINK = "https://t.me/CRYPTO_D_INCOME";
+        const TASK_4_LINK = "https://t.me/+gZEl6wYrSPY3YzRl";
+        const TASK_5_LINK = "https://t.me/WolfRush_bot/wolf_rush_earn?startapp=8505916897";
+        const TASK_6_LINK = "https://t.me/Crypto_Insight_BD49";
 
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
         const MAX_XP = 300;
@@ -644,7 +666,7 @@
         }
 
         function updateTaskButtons() {
-            ['video', 'partner', 'cryptopro', 'cryptoincome'].forEach(taskId => {
+            ['video', 'partner', 'cryptopro', 'cryptoincome', 'wolfrush', 'cryptoinsight'].forEach(taskId => {
                 const btn = document.getElementById(`task-btn-${taskId}`);
                 if (!btn) return;
 
