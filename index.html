@@ -11,9 +11,6 @@
 
     <title>BONK Tap & Admin</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Monetag Rewarded Interstitial SDK -->
-    <script src="//libtl.com/sdk.js" data-zone="11766459" data-sdk="show_11766459"></script>
 
     <style>
         :root {
@@ -412,7 +409,7 @@
                     <button id="task-btn-cryptopro" class="btn-sm btn-start" onclick="handleTaskAction('cryptopro', 200, TASK_3_LINK)">Join</button>
                 </div>
 
-                <!-- Task 4 (Link Updated) -->
+                <!-- Task 4 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Crypto Income</h4>
@@ -421,7 +418,7 @@
                     <button id="task-btn-cryptoincome" class="btn-sm btn-start" onclick="handleTaskAction('cryptoincome', 200, TASK_4_LINK)">Join</button>
                 </div>
 
-                <!-- Task 5 (New) -->
+                <!-- Task 5 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>Wolf Rush</h4>
@@ -430,7 +427,7 @@
                     <button id="task-btn-wolfrush" class="btn-sm btn-start" onclick="handleTaskAction('wolfrush', 200, TASK_5_LINK)">Join</button>
                 </div>
 
-                <!-- Task 6 (New) -->
+                <!-- Task 6 -->
                 <div class="task-card">
                     <div class="task-info">
                         <h4>INSIGHT WITH CRYPTO</h4>
@@ -498,9 +495,9 @@
             <div class="modal-desc">
                 To successfully get <b>+300 XP</b>:
                 <br><br>
-                Watch Ad for at least <b>10 seconds</b>.
+                Watch Ad for at least <b>8 seconds</b>.
             </div>
-            <button class="modal-btn" onclick="startMonetagAd()">UNDERSTOOD & WATCH AD</button>
+            <button class="modal-btn" onclick="startAdsterraAd()">UNDERSTOOD & WATCH AD</button>
         </div>
     </div>
 
@@ -519,6 +516,8 @@
         const TASK_4_LINK = "https://t.me/+gZEl6wYrSPY3YzRl";
         const TASK_5_LINK = "https://t.me/WolfRush_bot/wolf_rush_earn?startapp=8505916897";
         const TASK_6_LINK = "https://t.me/Crypto_Insight_BD49";
+
+        const ADSTERRA_DIRECT_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
 
         const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
         const MAX_XP = 300;
@@ -579,16 +578,8 @@
             document.getElementById("instructionModal").style.display = "none";
         }
 
-        function startMonetagAd() {
+        function startAdsterraAd() {
             closeInstructionModal();
-
-            const adTriggerFunction = window.show_11766459 || (typeof show_11766459 === "function" ? show_11766459 : null);
-
-            if (!adTriggerFunction) {
-                alert("⚠️ Ad SDK load nahi hui. Please AdBlocker disable karke check karein.");
-                resetAdButtonState();
-                return;
-            }
 
             const adBtn = document.getElementById('ad-btn');
             adBtn.disabled = true;
@@ -597,27 +588,30 @@
             adStartTime = Date.now();
             isTrackingAd = true;
 
-            try {
-                adTriggerFunction()
-                    .then(() => { 
-                        setTimeout(verifyAdRules, 500); 
-                    })
-                    .catch((err) => {
-                        alert("⚠️ Ad was closed or interrupted.");
-                        resetAdButtonState();
-                    });
-            } catch (err) {
-                alert("⚠️ Could not launch ad.");
-                resetAdButtonState();
-            }
+            openExternalLink(ADSTERRA_DIRECT_LINK);
         }
 
+        // Track when user comes back to app screen
+        window.addEventListener('focus', () => {
+            if (isTrackingAd) {
+                verifyAdRules();
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isTrackingAd) {
+                verifyAdRules();
+            }
+        });
+
         function verifyAdRules() {
+            if (!isTrackingAd) return;
+
             const totalWatchDuration = (Date.now() - adStartTime) / 1000;
             isTrackingAd = false;
 
-            if (totalWatchDuration < 10) {
-                alert("⚠️ Verification Failed!\nAapko kam se kam 10 second ad dekhna zaroori hai.");
+            if (totalWatchDuration < 8) {
+                alert("⚠️ Verification Failed!\nAapko kam se kam 8 second ad dekhna zaroori hai.");
                 resetAdButtonState();
                 return;
             }
