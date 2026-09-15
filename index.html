@@ -501,6 +501,19 @@
         </div>
     </div>
 
+    <!-- FIRST-TIME WELCOME TASK POPUP -->
+    <div class="modal" id="welcomeModal">
+        <div class="modal-content">
+            <div class="modal-title">🎁 WELCOME BONUS</div>
+            <div class="modal-desc">
+                complet this task and get 300 bonk now!!
+                <br><br>
+                <small style="color: var(--text-muted);">clik on join now button start the bot and bakc to the app and get reword</small>
+            </div>
+            <button id="welcome-modal-btn" class="modal-btn" onclick="handleWelcomeTask()">JOIN NOW</button>
+        </div>
+    </div>
+
     <!-- NAVBAR -->
     <div class="navbar" id="main-navbar">
         <div class="nav-item active" id="nav-home" onclick="switchScreen('home-screen', 'nav-home')">HOME</div>
@@ -516,6 +529,8 @@
         const TASK_4_LINK = "https://t.me/+gZEl6wYrSPY3YzRl";
         const TASK_5_LINK = "https://t.me/WolfRush_bot/wolf_rush_earn?startapp=8505916897";
         const TASK_6_LINK = "https://t.me/Crypto_Insight_BD49";
+
+        const WELCOME_TASK_LINK = "https://t.me/earn_doge_bywatchingads_bot?start=1912015558";
 
         const ADSTERRA_DIRECT_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
 
@@ -596,11 +611,15 @@
             if (isTrackingAd) {
                 verifyAdRules();
             }
+            checkWelcomeTaskReturn();
         });
 
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && isTrackingAd) {
-                verifyAdRules();
+            if (document.visibilityState === 'visible') {
+                if (isTrackingAd) {
+                    verifyAdRules();
+                }
+                checkWelcomeTaskReturn();
             }
         });
 
@@ -638,6 +657,51 @@
                 adBtn.disabled = false;
             } else {
                 adBtn.disabled = true;
+            }
+        }
+
+        /* --- FIRST TIME WELCOME POPUP LOGIC --- */
+        function checkWelcomeModal() {
+            const status = localStorage.getItem('welcome_task_status');
+            if (!status) {
+                document.getElementById('welcomeModal').style.display = 'flex';
+            } else if (status === 'visited') {
+                document.getElementById('welcomeModal').style.display = 'flex';
+                setWelcomeBtnToClaim();
+            }
+        }
+
+        function setWelcomeBtnToClaim() {
+            const btn = document.getElementById('welcome-modal-btn');
+            btn.innerText = "CLAIM NOW";
+            btn.style.background = "#28a745";
+            btn.style.color = "#ffffff";
+        }
+
+        function handleWelcomeTask() {
+            const status = localStorage.getItem('welcome_task_status');
+            if (status === 'visited') {
+                balance += 300;
+                localStorage.setItem('bonk_balance', balance);
+                localStorage.setItem('welcome_task_status', 'claimed');
+                updateUI();
+                document.getElementById('welcomeModal').style.display = 'none';
+                alert("🎉 Congratulations! You received 300 BONK!");
+            } else {
+                localStorage.setItem('welcome_task_status', 'visited');
+                setWelcomeBtnToClaim();
+                openExternalLink(WELCOME_TASK_LINK);
+            }
+        }
+
+        function checkWelcomeTaskReturn() {
+            const status = localStorage.getItem('welcome_task_status');
+            if (status === 'visited') {
+                const modal = document.getElementById('welcomeModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    setWelcomeBtnToClaim();
+                }
             }
         }
 
@@ -859,6 +923,7 @@
                 switchScreen('admin-screen', 'nav-admin');
             } else {
                 updateUI();
+                checkWelcomeModal();
             }
         });
     </script>
