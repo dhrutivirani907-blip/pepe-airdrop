@@ -487,3 +487,175 @@
         </div>
 
     </div>
+
+       <!-- Mandatory Instructions Modal Popup -->
+    <div class="modal" id="instructionModal">
+        <div class="modal-content">
+            <div class="modal-title">⚡ Refill Energy</div>
+            <div class="modal-desc">
+                To successfully get <b>+300 XP</b>:
+                <br><br>
+                Watch Ad for at least <b>8 seconds</b>.
+            </div>
+            <button class="modal-btn" onclick="startAdsterraAd()">UNDERSTOOD & WATCH AD</button>
+        </div>
+    </div>
+
+    <!-- FIRST-TIME WELCOME TASK POPUP -->
+    <div class="modal" id="welcomeModal">
+        <div class="modal-content">
+            <div class="modal-title">🎁 WELCOME BONUS</div>
+            <div class="modal-desc">
+                complet this task and get 300 bonk now!!
+                <br><br>
+                <small style="color: var(--text-muted);">clik on join now button start the bot and bakc to the app and get reword</small>
+            </div>
+            <button id="welcome-modal-btn" class="modal-btn" onclick="handleWelcomeTask()">JOIN NOW</button>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <div class="navbar" id="main-navbar">
+        <div class="nav-item active" id="nav-home" onclick="switchScreen('home-screen', 'nav-home')">HOME</div>
+        <div class="nav-item" id="nav-tasks" onclick="switchScreen('tasks-screen', 'nav-tasks')">TASKS</div>
+        <div class="nav-item" id="nav-withdraw" onclick="switchScreen('withdraw-screen', 'nav-withdraw')">WITHDRAW</div>
+        <div class="nav-item" id="nav-admin" style="display:none;" onclick="switchScreen('admin-screen', 'nav-admin')">ADMIN</div>
+    </div>
+
+    <script>
+        const TASK_1_LINK = "https://t.me/MetaCcx_bot?start=1912015558";
+        const TASK_2_LINK = "https://t.me/SHIBAInuTapbot?start=1912015558";
+        const TASK_3_LINK = "https://t.me/CryptoProUpRobot?start=Bot51728662";
+        const TASK_4_LINK = "https://t.me/+gZEl6wYrSPY3YzRl";
+        const TASK_5_LINK = "https://t.me/WolfRush_bot/wolf_rush_earn?startapp=8505916897";
+        const TASK_6_LINK = "https://t.me/Crypto_Insight_BD49";
+
+        const WELCOME_TASK_LINK = "https://t.me/earn_doge_bywatchingads_bot?start=1912015558";
+
+        const ADSTERRA_DIRECT_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
+
+        const BACKEND_URL = "https://pepe-backend-wkym.onrender.com";
+        const MAX_XP = 300;
+        
+        let balance = parseInt(localStorage.getItem('bonk_balance'));
+        if (isNaN(balance) || balance < 0) balance = 0;
+
+        let xp = parseInt(localStorage.getItem('bonk_xp'));
+        if (isNaN(xp) || xp > MAX_XP) xp = MAX_XP;
+
+        let adStartTime = 0;
+        let isTrackingAd = false;
+        let isWithdrawSubmitting = false;
+
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
+        function updateUI() {
+            document.getElementById('balance-val').innerText = balance.toLocaleString();
+            document.getElementById('withdraw-balance-val').innerText = balance.toLocaleString();
+            document.getElementById('xp-val').innerText = xp;
+            
+            let fillPercentage = Math.max(0, Math.min(100, (xp / MAX_XP) * 100));
+            document.getElementById('xp-fill').style.width = fillPercentage + '%';
+
+            const adBtn = document.getElementById('ad-btn');
+            if (xp <= 0) {
+                adBtn.disabled = false;
+            } else {
+                adBtn.disabled = true;
+            }
+
+            updateTaskButtons();
+        }
+
+        function handleTap() {
+            if (xp >= 10) {
+                balance += 1;
+                xp -= 10;
+                
+                localStorage.setItem('bonk_balance', balance);
+                localStorage.setItem('bonk_xp', xp);
+                
+                updateUI();
+            } else {
+                alert("Out of Energy! Watch Ad to refill.");
+            }
+        }
+
+        function openInstructionModal() {
+            if (xp > 0) return;
+            document.getElementById("instructionModal").style.display = "flex";
+        }
+
+        function closeInstructionModal() {
+            document.getElementById("instructionModal").style.display = "none";
+        }
+
+        function startAdsterraAd() {
+            closeInstructionModal();
+
+            const adBtn = document.getElementById('ad-btn');
+            adBtn.disabled = true;
+            adBtn.innerText = "⏳ Watching Ad...";
+
+            adStartTime = Date.now();
+            isTrackingAd = true;
+
+            openExternalLink(ADSTERRA_DIRECT_LINK);
+        }
+
+        // Track when user comes back to app screen
+        window.addEventListener('focus', () => {
+            if (isTrackingAd) {
+                verifyAdRules();
+            }
+            checkWelcomeTaskReturn();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                if (isTrackingAd) {
+                    verifyAdRules();
+                }
+                checkWelcomeTaskReturn();
+            }
+        });
+
+        function verifyAdRules() {
+            if (!isTrackingAd) return;
+
+            const totalWatchDuration = (Date.now() - adStartTime) / 1000;
+            isTrackingAd = false;
+
+            if (totalWatchDuration < 8) {
+                alert("⚠️ Verification Failed!\nAapko kam se kam 8 second ad dekhna zaroori hai.");
+                resetAdButtonState();
+                return;
+            }
+
+            xp = MAX_XP;
+            localStorage.setItem('bonk_xp', MAX_XP);
+            updateUI();
+
+            fetch(`${BACKEND_URL}/api/bonk/recharge-energy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ energyAmount: MAX_XP })
+            }).catch(err => console.log('Backend sync error ignored'));
+
+            alert("⚡ Energy Refilled to 300 XP!");
+            resetAdButtonState();
+        }
+
+        function resetAdButtonState() {
+            isTrackingAd = false;
+            const adBtn = document.getElementById('ad-btn');
+            adBtn.innerText = "🎬 Watch Ads & Full Energy (+300 XP)";
+            if (xp <= 0) {
+                adBtn.disabled = false;
+            } else {
+                adBtn.disabled = true;
+            }
+        }
