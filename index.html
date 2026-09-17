@@ -1,910 +1,1322 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=no"
+>
+
+<meta
+    http-equiv="Cache-Control"
+    content="no-cache, no-store, must-revalidate"
+>
+
+<meta
+    http-equiv="Pragma"
+    content="no-cache"
+>
+
+<meta
+    http-equiv="Expires"
+    content="0"
+>
 
 <title>BONK Tap & Admin</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-    :root {
-        --bg-color: #0b0c10;
-        --card-bg: #1f2833;
-        --gold: #f3ba2f;
-        --gold-gradient: linear-gradient(135deg, #f3ba2f 0%, #f1a80a 100%);
-        --text-color: #ffffff;
-        --text-muted: #c5c6c7;
-        --border-color: #2c3540;
-        --green: #28a745;
-        --red: #dc3545;
-        --blue: #0088cc;
-    }
 
-    * {
-        box-sizing: border-box;
-        user-select: none;
-        -webkit-user-select: none;
-    }
+:root {
+    --bg-color: #0b0c10;
+    --card-bg: #1f2833;
+    --gold: #f3ba2f;
+    --gold-gradient: linear-gradient(
+        135deg,
+        #f3ba2f 0%,
+        #f1a80a 100%
+    );
+    --text-color: #ffffff;
+    --text-muted: #c5c6c7;
+    --border-color: #2c3540;
+    --green: #28a745;
+    --red: #dc3545;
+    --blue: #0088cc;
+}
 
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+}
 
-    .container {
-        flex: 1;
-        padding: 20px;
-        margin-bottom: 70px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+body {
+    margin: 0;
+    padding: 0;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        sans-serif;
 
-    .balance-header {
-        text-align: center;
-        margin-top: 10px;
-    }
+    background-color: var(--bg-color);
+    color: var(--text-color);
 
-    .balance-title {
-        font-size: 14px;
-        color: var(--text-muted);
-        letter-spacing: 1px;
-    }
+    display: flex;
+    flex-direction: column;
 
-    .balance-amount {
-        font-size: 42px;
-        font-weight: 800;
-        color: var(--gold);
-        margin: 5px 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
+    min-height: 100vh;
+}
 
-    .tap-area {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        margin: 20px 0;
-    }
+.container {
+    flex: 1;
 
-    .coin-btn {
-        width: 220px;
-        height: 220px;
-        border-radius: 50%;
-        background: radial-gradient(circle, #2b2b2b 0%, #111111 100%);
-        border: 4px solid var(--gold);
-        box-shadow: 0 0 30px rgba(243, 186, 47, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: transform 0.05s ease;
-    }
+    padding: 20px;
 
-    .coin-btn:active {
-        transform: scale(0.95);
-    }
+    margin-bottom: 70px;
 
-    .coin-img {
-        width: 160px;
-        height: 160px;
-        border-radius: 50%;
-        object-fit: cover;
-        pointer-events: none;
-    }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-    .energy-box {
-        width: 100%;
-        max-width: 320px;
-        text-align: center;
-        margin-bottom: 15px;
-    }
+.balance-header {
+    text-align: center;
+    margin-top: 10px;
+}
 
-    .energy-text {
-        font-size: 16px;
-        font-weight: bold;
-        color: var(--gold);
-        margin-bottom: 8px;
-    }
+.balance-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
 
-    .progress-bar {
-        width: 100%;
-        height: 12px;
-        background: #1e2022;
-        border-radius: 10px;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-    }
+.balance-amount {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--gold);
 
-    .progress-fill {
-        height: 100%;
-        width: 100%;
-        background: var(--gold-gradient);
-        transition: width 0.2s;
-    }
+    margin: 5px 0;
 
-    .btn {
-        width: 100%;
-        max-width: 320px;
-        padding: 14px;
-        border: none;
-        border-radius: 12px;
-        font-size: 15px;
-        font-weight: bold;
-        cursor: pointer;
-        background: var(--gold-gradient);
-        color: #000;
-        box-shadow: 0 4px 15px rgba(243, 186, 47, 0.2);
-        margin-top: 10px;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    .btn:disabled {
-        background: #2c3540 !important;
-        color: #6c757d !important;
-        box-shadow: none;
-        cursor: not-allowed;
-    }
+    gap: 10px;
+}
 
-    .btn-sm {
-        padding: 8px 14px;
-        font-size: 13px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        font-weight: bold;
-        color: #fff;
-    }
+.tap-area {
+    flex: 1;
 
-    .btn-start {
-        background: var(--blue);
-    }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
-    .btn-approve {
-        background: var(--green);
-    }
+    width: 100%;
 
-    .btn-reject {
-        background: var(--red);
-    }
+    margin: 20px 0;
+}
 
-    .btn-done {
-        background: #2c3540;
-        color: #6c757d;
-        cursor: not-allowed;
-    }
+.coin-btn {
+    width: 220px;
+    height: 220px;
 
-    .card {
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 16px;
-        padding: 20px;
-        width: 100%;
-        max-width: 360px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-    }
+    border-radius: 50%;
 
-    .input-group {
-        margin-bottom: 15px;
-        text-align: left;
-    }
+    background:
+        radial-gradient(
+            circle,
+            #2b2b2b 0%,
+            #111111 100%
+        );
 
-    .input-group label {
-        font-size: 12px;
-        color: var(--text-muted);
-        display: block;
-        margin-bottom: 6px;
-    }
+    border: 4px solid var(--gold);
 
-    input {
-        width: 100%;
-        padding: 14px;
-        background: #111418;
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        color: #fff;
-        font-size: 14px;
-        outline: none;
-    }
+    box-shadow:
+        0 0 30px rgba(
+            243,
+            186,
+            47,
+            0.3
+        );
 
-    input:focus {
-        border-color: var(--gold);
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    .navbar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #121418;
-        border-top: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-around;
-        padding: 12px 0;
-        z-index: 999;
-    }
+    cursor: pointer;
 
-    .nav-item {
-        color: var(--text-muted);
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        flex: 1;
-        text-align: center;
-    }
+    transition:
+        transform 0.05s ease;
+}
 
-    .nav-item.active {
-        color: var(--gold);
-    }
+.coin-btn:active {
+    transform: scale(0.95);
+}
 
-    .screen {
-        display: none;
-        width: 100%;
-    }
+.coin-img {
+    width: 160px;
+    height: 160px;
 
-    .screen.active {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+    border-radius: 50%;
 
-    .admin-table {
-        width: 100%;
-        max-width: 500px;
-        border-collapse: collapse;
-        margin-top: 15px;
-        font-size: 13px;
-    }
+    object-fit: cover;
 
-    .admin-table th,
-    .admin-table td {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid var(--border-color);
-    }
+    pointer-events: none;
+}
 
-    .admin-table th {
-        color: var(--gold);
-        background: #111418;
-    }
+.energy-box {
+    width: 100%;
+    max-width: 320px;
 
-    .task-list {
-        width: 100%;
-        max-width: 360px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 15px;
-    }
+    text-align: center;
 
-    .task-card {
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+    margin-bottom: 15px;
+}
 
-    .task-info h4 {
-        margin: 0 0 5px 0;
-        font-size: 15px;
-        color: #fff;
-    }
+.energy-text {
+    font-size: 16px;
+    font-weight: bold;
 
-    .task-info p {
-        margin: 0;
-        font-size: 13px;
-        color: var(--gold);
-        font-weight: bold;
-    }
+    color: var(--gold);
 
-    /* REFERRAL SECTION */
-    .referral-card {
-        width: 100%;
-        max-width: 360px;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 16px;
-        padding: 20px;
-        margin-top: 15px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-        text-align: center;
-    }
+    margin-bottom: 8px;
+}
 
-    .referral-icon {
-        font-size: 48px;
-        margin-bottom: 8px;
-    }
+.progress-bar {
+    width: 100%;
+    height: 12px;
 
-    .referral-title {
-        font-size: 21px;
-        font-weight: 800;
-        color: var(--gold);
-        margin-bottom: 8px;
-    }
+    background: #1e2022;
 
-    .referral-desc {
-        font-size: 13px;
-        color: var(--text-muted);
-        line-height: 1.5;
-        margin-bottom: 18px;
-    }
+    border-radius: 10px;
 
-    .referral-stats {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 18px;
-    }
+    overflow: hidden;
 
-    .referral-stat {
-        flex: 1;
-        background: #111418;
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 12px 5px;
-    }
+    border: 1px solid var(--border-color);
+}
 
-    .referral-stat-value {
-        font-size: 20px;
-        font-weight: 800;
-        color: var(--gold);
-    }
+.progress-fill {
+    height: 100%;
 
-    .referral-stat-label {
-        font-size: 11px;
-        color: var(--text-muted);
-        margin-top: 3px;
-    }
+    width: 100%;
 
-    .referral-link-box {
-        background: #111418;
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        padding: 12px;
-        font-size: 12px;
-        color: #fff;
-        word-break: break-all;
-        text-align: left;
-        margin-bottom: 10px;
-    }
+    background: var(--gold-gradient);
 
-    .copy-btn {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 10px;
-        background: var(--gold-gradient);
-        color: #000;
-        font-weight: 800;
-        cursor: pointer;
-        font-size: 14px;
-    }
+    transition: width 0.2s;
+}
 
-    .share-btn {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 10px;
-        background: #0088cc;
-        color: #fff;
-        font-weight: 800;
-        cursor: pointer;
-        font-size: 14px;
-        margin-top: 10px;
-    }
+.btn {
+    width: 100%;
+    max-width: 320px;
 
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.85);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    }
+    padding: 14px;
 
-    .modal-content {
-        background: #1c1c1e;
-        border-radius: 20px;
-        padding: 24px;
-        width: 100%;
-        max-width: 380px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+    border: none;
 
-    .modal-title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #f3ba2f;
-        margin-bottom: 12px;
-        text-align: center;
-    }
+    border-radius: 12px;
 
-    .modal-desc {
-        font-size: 14px;
-        color: #e5e5ea;
-        line-height: 1.5;
-        margin-bottom: 18px;
-        text-align: center;
-    }
+    font-size: 15px;
+    font-weight: bold;
 
-    .modal-btn {
-        background: var(--gold);
-        color: black;
-        border: none;
-        padding: 12px;
-        width: 100%;
-        border-radius: 10px;
-        font-weight: bold;
-        font-size: 15px;
-        cursor: pointer;
-    }
+    cursor: pointer;
+
+    background: var(--gold-gradient);
+
+    color: #000;
+
+    box-shadow:
+        0 4px 15px rgba(
+            243,
+            186,
+            47,
+            0.2
+        );
+
+    margin-top: 10px;
+}
+
+.btn:disabled {
+    background: #2c3540 !important;
+
+    color: #6c757d !important;
+
+    box-shadow: none;
+
+    cursor: not-allowed;
+}
+
+.btn-sm {
+    padding: 8px 14px;
+
+    font-size: 13px;
+
+    border-radius: 8px;
+
+    border: none;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    color: #fff;
+}
+
+.btn-start {
+    background: var(--blue);
+}
+
+.btn-approve {
+    background: var(--green);
+}
+
+.btn-reject {
+    background: var(--red);
+}
+
+.btn-done {
+    background: #2c3540;
+
+    color: #6c757d;
+
+    cursor: not-allowed;
+}
+
+.card {
+    background: var(--card-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    width: 100%;
+    max-width: 360px;
+
+    box-shadow:
+        0 8px 20px rgba(
+            0,
+            0,
+            0,
+            0.5
+        );
+}
+
+.input-group {
+    margin-bottom: 15px;
+
+    text-align: left;
+}
+
+.input-group label {
+    font-size: 12px;
+
+    color: var(--text-muted);
+
+    display: block;
+
+    margin-bottom: 6px;
+}
+
+input {
+    width: 100%;
+
+    padding: 14px;
+
+    background: #111418;
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 10px;
+
+    color: #fff;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+input:focus {
+    border-color: var(--gold);
+}
+
+.navbar {
+    position: fixed;
+
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    background: #121418;
+
+    border-top:
+        1px solid var(--border-color);
+
+    display: flex;
+
+    justify-content: space-around;
+
+    padding: 12px 0;
+
+    z-index: 999;
+}
+
+.nav-item {
+    color: var(--text-muted);
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    flex: 1;
+
+    text-align: center;
+}
+
+.nav-item.active {
+    color: var(--gold);
+}
+
+.screen {
+    display: none;
+
+    width: 100%;
+}
+
+.screen.active {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+}
+
+.admin-table {
+    width: 100%;
+    max-width: 500px;
+
+    border-collapse: collapse;
+
+    margin-top: 15px;
+
+    font-size: 13px;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 10px;
+
+    text-align: left;
+
+    border-bottom:
+        1px solid var(--border-color);
+}
+
+.admin-table th {
+    color: var(--gold);
+
+    background: #111418;
+}
+
+.task-list {
+    width: 100%;
+    max-width: 360px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    margin-top: 15px;
+}
+
+.task-card {
+    background: var(--card-bg);
+
+    border:
+        1px solid var(--border-color);
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.task-info h4 {
+    margin: 0 0 5px 0;
+
+    font-size: 15px;
+
+    color: #fff;
+}
+
+.task-info p {
+    margin: 0;
+
+    font-size: 13px;
+
+    color: var(--gold);
+
+    font-weight: bold;
+}
+
+
+/* =====================================================
+   REFERRAL
+   ===================================================== */
+
+.referral-card {
+    width: 100%;
+    max-width: 360px;
+
+    background: var(--card-bg);
+
+    border:
+        1px solid var(--border-color);
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    margin-top: 15px;
+
+    box-shadow:
+        0 8px 20px rgba(
+            0,
+            0,
+            0,
+            0.5
+        );
+
+    text-align: center;
+}
+
+.referral-icon {
+    font-size: 48px;
+
+    margin-bottom: 8px;
+}
+
+.referral-title {
+    font-size: 21px;
+
+    font-weight: 800;
+
+    color: var(--gold);
+
+    margin-bottom: 8px;
+}
+
+.referral-desc {
+    font-size: 13px;
+
+    color: var(--text-muted);
+
+    line-height: 1.5;
+
+    margin-bottom: 18px;
+}
+
+.referral-stats {
+    display: flex;
+
+    gap: 10px;
+
+    margin-bottom: 18px;
+}
+
+.referral-stat {
+    flex: 1;
+
+    background: #111418;
+
+    border:
+        1px solid var(--border-color);
+
+    border-radius: 12px;
+
+    padding: 12px 5px;
+}
+
+.referral-stat-value {
+    font-size: 20px;
+
+    font-weight: 800;
+
+    color: var(--gold);
+}
+
+.referral-stat-label {
+    font-size: 11px;
+
+    color: var(--text-muted);
+
+    margin-top: 3px;
+}
+
+.referral-link-box {
+    background: #111418;
+
+    border:
+        1px solid var(--border-color);
+
+    border-radius: 10px;
+
+    padding: 12px;
+
+    font-size: 12px;
+
+    color: #fff;
+
+    word-break: break-all;
+
+    text-align: left;
+
+    margin-bottom: 10px;
+}
+
+.copy-btn {
+    width: 100%;
+
+    padding: 12px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: var(--gold-gradient);
+
+    color: #000;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    font-size: 14px;
+}
+
+.share-btn {
+    width: 100%;
+
+    padding: 12px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #0088cc;
+
+    color: #fff;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    margin-top: 10px;
+}
+
+
+/* =====================================================
+   MODALS
+   ===================================================== */
+
+.modal {
+    display: none;
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            0.85
+        );
+
+    z-index: 1000;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 20px;
+}
+
+.modal-content {
+    background: #1c1c1e;
+
+    border-radius: 20px;
+
+    padding: 24px;
+
+    width: 100%;
+
+    max-width: 380px;
+
+    border:
+        1px solid rgba(
+            255,
+            255,
+            255,
+            0.1
+        );
+}
+
+.modal-title {
+    font-size: 18px;
+
+    font-weight: bold;
+
+    color: #f3ba2f;
+
+    margin-bottom: 12px;
+
+    text-align: center;
+}
+
+.modal-desc {
+    font-size: 14px;
+
+    color: #e5e5ea;
+
+    line-height: 1.5;
+
+    margin-bottom: 18px;
+
+    text-align: center;
+}
+
+.modal-btn {
+    background: var(--gold);
+
+    color: black;
+
+    border: none;
+
+    padding: 12px;
+
+    width: 100%;
+
+    border-radius: 10px;
+
+    font-weight: bold;
+
+    font-size: 15px;
+
+    cursor: pointer;
+}
+
 </style>
+
 </head>
 
 <body>
 
+
 <div class="container">
 
-    <!-- HOME SCREEN -->
-    <div id="home-screen" class="screen active">
 
-        <div class="balance-header">
-            <div class="balance-title">BALANCE</div>
+<!-- =====================================================
+     HOME
+     ===================================================== -->
 
-            <div class="balance-amount">
-                ⚡ <span id="balance-val">0</span>
-            </div>
+<div
+    id="home-screen"
+    class="screen active"
+>
+
+    <div class="balance-header">
+
+        <div class="balance-title">
+            BALANCE
         </div>
 
-        <div class="tap-area">
-            <div class="coin-btn" id="coin-btn" onclick="handleTap()">
+        <div class="balance-amount">
 
-                <img
-                    src="assets/bonk.png"
-                    alt="BONK"
-                    class="coin-img"
-                    onerror="this.src='https://cryptologos.cc/logos/bonk1-bonk-logo.png'"
-                >
+            ⚡
 
-            </div>
-        </div>
-
-        <div class="energy-box">
-
-            <div class="energy-text">
-                ⚡ <span id="xp-val">300</span> / 300
-            </div>
-
-            <div class="progress-bar">
-                <div
-                    id="xp-fill"
-                    class="progress-fill"
-                    style="width: 100%;"
-                ></div>
-            </div>
+            <span id="balance-val">
+                0
+            </span>
 
         </div>
-
-        <button
-            id="ad-btn"
-            class="btn"
-            onclick="openInstructionModal()"
-            disabled
-        >
-            🎬 Watch Ads & Full Energy (+300 XP)
-        </button>
 
     </div>
 
 
-    <!-- TASKS SCREEN -->
-    <div id="tasks-screen" class="screen">
+    <div class="tap-area">
 
         <div
-            class="balance-header"
-            style="margin-bottom: 20px;"
+            class="coin-btn"
+            id="coin-btn"
+            onclick="handleTap()"
         >
-            <div class="balance-title">
-                EARN EXTRA BONK
-            </div>
 
-            <div
-                class="balance-amount"
-                style="font-size: 28px;"
+            <img
+                src="assets/bonk.png"
+                alt="BONK"
+                class="coin-img"
+                onerror="this.src='https://cryptologos.cc/logos/bonk1-bonk-logo.png'"
             >
-                Complete Tasks
-            </div>
-        </div>
-
-        <div class="task-list">
-
-            <!-- Task 1 -->
-            <div class="task-card">
-
-                <div class="task-info">
-                    <h4>Join MetaCcx Bot</h4>
-                    <p>+200 BONK</p>
-                </div>
-
-                <button
-                    id="task-btn-video"
-                    class="btn-sm btn-start"
-                    onclick="handleTaskAction('video', 200, TASK_1_LINK)"
-                >
-                    Join
-                </button>
-
-            </div>
-
-
-            <!-- Task 2 -->
-            <div class="task-card">
-
-                <div class="task-info">
-                    <h4>Join SHIBA Inu Bot</h4>
-                    <p>+200 BONK</p>
-                </div>
-
-                <button
-                    id="task-btn-partner"
-                    class="btn-sm btn-start"
-                    onclick="handleTaskAction('partner', 200, TASK_2_LINK)"
-                >
-                    Join
-                </button>
-
-            </div>
-
-
-            <!-- Task 3 -->
-            <div class="task-card">
-
-                <div class="task-info">
-                    <h4>Join CryptoPro Up Bot</h4>
-                    <p>+200 BONK</p>
-                </div>
-
-                <button
-                    id="task-btn-cryptopro"
-                    class="btn-sm btn-start"
-                    onclick="handleTaskAction('cryptopro', 200, TASK_3_LINK)"
-                >
-                    Join
-                </button>
-
-            </div>
-
-
-            <!-- Task 4 -->
-            <div class="task-card">
-
-                <div class="task-info">
-                    <h4>Crypto Income</h4>
-                    <p>+200 BONK</p>
-                </div>
-
-                <button
-                    id="task-btn-cryptoincome"
-                    class="btn-sm btn-start"
-                    onclick="handleTaskAction('cryptoincome', 200, TASK_4_LINK)"
-                >
-                    Join
-                </button>
-
-            </div>
-
-
-            <!-- Task 5 -->
-            <div class="task-card">
-
-                <div class="task-info">
-                    <h4>Wolf Rush</h4>
-                    <p>+200 BONK</p>
-                </div>
-
-                <button
-                    id="task-btn-wolfrush"
-                    class="btn-sm btn-start"
-                    onclick="handleTaskAction('wolfrush', 200, TASK_5_LINK)"
-                >
-                    Join
-                </button>
-
-            </div>
-
-
-            <!-- Task 6 -->
-            <div class="task-card">
-
-                <div class="task-info">
-                    <h4>INSIGHT WITH CRYPTO</h4>
-                    <p>+200 BONK</p>
-                </div>
-
-                <button
-                    id="task-btn-cryptoinsight"
-                    class="btn-sm btn-start"
-                    onclick="handleTaskAction('cryptoinsight', 200, TASK_6_LINK)"
-                >
-                    Join
-                </button>
-
-            </div>
 
         </div>
+
     </div>
 
 
-    <!-- REFERRAL SCREEN -->
-    <div id="referral-screen" class="screen">
+    <div class="energy-box">
 
-        <div
-            class="balance-header"
-            style="margin-bottom: 10px;"
-        >
+        <div class="energy-text">
 
-            <div class="balance-title">
-                INVITE & EARN
-            </div>
+            ⚡
 
-            <div
-                class="balance-amount"
-                style="font-size: 28px;"
-            >
-                Referral
-            </div>
+            <span id="xp-val">
+                300
+            </span>
+
+            / 300
 
         </div>
 
 
-        <div class="referral-card">
-
-            <div class="referral-icon">
-                👥
-            </div>
-
-            <div class="referral-title">
-                Invite Friends
-            </div>
-
-            <div class="referral-desc">
-                Invite your friends to BONK Tap.
-                When a new user joins the app using your
-                referral link, you receive
-                <b style="color:#f3ba2f;">300 BONK</b>.
-            </div>
-
-
-            <div class="referral-stats">
-
-                <div class="referral-stat">
-
-                    <div
-                        id="referral-count"
-                        class="referral-stat-value"
-                    >
-                        0
-                    </div>
-
-                    <div class="referral-stat-label">
-                        REFERRALS
-                    </div>
-
-                </div>
-
-
-                <div class="referral-stat">
-
-                    <div
-                        id="referral-earned"
-                        class="referral-stat-value"
-                    >
-                        0
-                    </div>
-
-                    <div class="referral-stat-label">
-                        BONK EARNED
-                    </div>
-
-                </div>
-
-            </div>
-
+        <div class="progress-bar">
 
             <div
-                style="
-                    font-size:12px;
-                    color:#c5c6c7;
-                    margin-bottom:6px;
-                    text-align:left;
-                "
-            >
-                YOUR REFERRAL LINK
+                id="xp-fill"
+                class="progress-fill"
+                style="width:100%;"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <button
+        id="ad-btn"
+        class="btn"
+        onclick="openInstructionModal()"
+        disabled
+    >
+        🎬 Watch Ads & Full Energy (+300 XP)
+    </button>
+
+</div>
+
+
+
+<!-- =====================================================
+     TASKS
+     ===================================================== -->
+
+<div
+    id="tasks-screen"
+    class="screen"
+>
+
+    <div
+        class="balance-header"
+        style="margin-bottom:20px;"
+    >
+
+        <div class="balance-title">
+            EARN EXTRA BONK
+        </div>
+
+        <div
+            class="balance-amount"
+            style="font-size:28px;"
+        >
+            Complete Tasks
+        </div>
+
+    </div>
+
+
+    <div class="task-list">
+
+
+        <div class="task-card">
+
+            <div class="task-info">
+
+                <h4>
+                    Join MetaCcx Bot
+                </h4>
+
+                <p>
+                    +200 BONK
+                </p>
+
             </div>
 
-
-            <div
-                id="referral-link"
-                class="referral-link-box"
-            >
-                Generating referral link...
-            </div>
-
-
             <button
-                class="copy-btn"
-                onclick="copyReferralLink()"
+                id="task-btn-video"
+                class="btn-sm btn-start"
+                onclick="handleTaskAction('video',200,TASK_1_LINK)"
             >
-                📋 COPY REFERRAL LINK
-            </button>
-
-
-            <button
-                class="share-btn"
-                onclick="shareReferralLink()"
-            >
-                🚀 SHARE WITH FRIENDS
+                Join
             </button>
 
         </div>
 
-    </div>
 
+        <div class="task-card">
 
-    <!-- WITHDRAW SCREEN -->
-    <div id="withdraw-screen" class="screen">
+            <div class="task-info">
 
-        <div
-            class="balance-header"
-            style="margin-bottom: 20px;"
-        >
+                <h4>
+                    Join SHIBA Inu Bot
+                </h4>
 
-            <div class="balance-title">
-                WITHDRAW BALANCE
-            </div>
-
-            <div class="balance-amount">
-                <span id="withdraw-balance-val">0</span> BONK
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="input-group">
-
-                <label>
-                    Binance Pay ID / User ID
-                </label>
-
-                <input
-                    type="text"
-                    id="binance-id"
-                    placeholder="Enter your Binance ID"
-                >
+                <p>
+                    +200 BONK
+                </p>
 
             </div>
-
-
-            <div class="input-group">
-
-                <label>
-                    Amount (Min: 1,000 BONK)
-                </label>
-
-                <input
-                    type="number"
-                    id="withdraw-amount"
-                    placeholder="Min 1000"
-                >
-
-            </div>
-
 
             <button
-                id="withdraw-btn"
-                class="btn"
-                onclick="submitWithdrawal()"
+                id="task-btn-partner"
+                class="btn-sm btn-start"
+                onclick="handleTaskAction('partner',200,TASK_2_LINK)"
             >
-                Withdraw Now
+                Join
             </button>
 
         </div>
 
-    </div>
 
+        <div class="task-card">
 
-    <!-- ADMIN PANEL SCREEN -->
-    <div id="admin-screen" class="screen">
+            <div class="task-info">
 
-        <div class="balance-header">
+                <h4>
+                    Join CryptoPro Up Bot
+                </h4>
 
-            <div class="balance-title">
-                BONK ADMIN DASHBOARD
+                <p>
+                    +200 BONK
+                </p>
+
             </div>
 
-            <div
-                class="balance-amount"
-                style="font-size: 24px;"
+            <button
+                id="task-btn-cryptopro"
+                class="btn-sm btn-start"
+                onclick="handleTaskAction('cryptopro',200,TASK_3_LINK)"
             >
-                Withdrawal Requests
-            </div>
+                Join
+            </button>
 
         </div>
 
 
-        <button
-            class="btn"
-            style="
-                width:auto;
-                padding:8px 16px;
-                margin-bottom:15px;
-            "
-            onclick="fetchWithdrawals()"
-        >
-            🔄 Refresh Requests
-        </button>
+        <div class="task-card">
+
+            <div class="task-info">
+
+                <h4>
+                    Crypto Income
+                </h4>
+
+                <p>
+                    +200 BONK
+                </p>
+
+            </div>
+
+            <button
+                id="task-btn-cryptoincome"
+                class="btn-sm btn-start"
+                onclick="handleTaskAction('cryptoincome',200,TASK_4_LINK)"
+            >
+                Join
+            </button>
+
+        </div>
 
 
-        <table class="admin-table">
+        <div class="task-card">
 
-            <thead>
+            <div class="task-info">
 
-                <tr>
-                    <th>Binance ID</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
+                <h4>
+                    Wolf Rush
+                </h4>
 
-            </thead>
+                <p>
+                    +200 BONK
+                </p>
+
+            </div>
+
+            <button
+                id="task-btn-wolfrush"
+                class="btn-sm btn-start"
+                onclick="handleTaskAction('wolfrush',200,TASK_5_LINK)"
+            >
+                Join
+            </button>
+
+        </div>
 
 
-            <tbody id="withdrawal-list">
+        <div class="task-card">
 
-                <tr>
-                    <td
-                        colspan="4"
-                        style="text-align:center;"
-                    >
-                        Loading requests...
-                    </td>
-                </tr>
+            <div class="task-info">
 
-            </tbody>
+                <h4>
+                    INSIGHT WITH CRYPTO
+                </h4>
 
-        </table>
+                <p>
+                    +200 BONK
+                </p>
+
+            </div>
+
+            <button
+                id="task-btn-cryptoinsight"
+                class="btn-sm btn-start"
+                onclick="handleTaskAction('cryptoinsight',200,TASK_6_LINK)"
+            >
+                Join
+            </button>
+
+        </div>
+
 
     </div>
 
 </div>
 
 
-<!-- Mandatory Instructions Modal -->
+
+<!-- =====================================================
+     REFERRAL
+     ===================================================== -->
+
+<div
+    id="referral-screen"
+    class="screen"
+>
+
+    <div
+        class="balance-header"
+        style="margin-bottom:10px;"
+    >
+
+        <div class="balance-title">
+            INVITE & EARN
+        </div>
+
+        <div
+            class="balance-amount"
+            style="font-size:28px;"
+        >
+            Referral
+        </div>
+
+    </div>
+
+
+    <div class="referral-card">
+
+        <div class="referral-icon">
+            👥
+        </div>
+
+
+        <div class="referral-title">
+            Invite Friends
+        </div>
+
+
+        <div class="referral-desc">
+
+            Invite your friends to BONK Tap.
+
+            When a new user joins the app
+            using your referral link,
+            you receive
+
+            <b style="color:#f3ba2f;">
+                300 BONK
+            </b>.
+
+        </div>
+
+
+        <div class="referral-stats">
+
+
+            <div class="referral-stat">
+
+                <div
+                    id="referral-count"
+                    class="referral-stat-value"
+                >
+                    0
+                </div>
+
+                <div class="referral-stat-label">
+                    REFERRALS
+                </div>
+
+            </div>
+
+
+            <div class="referral-stat">
+
+                <div
+                    id="referral-earned"
+                    class="referral-stat-value"
+                >
+                    0
+                </div>
+
+                <div class="referral-stat-label">
+                    BONK EARNED
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <div
+            style="
+                font-size:12px;
+                color:#c5c6c7;
+                margin-bottom:6px;
+                text-align:left;
+            "
+        >
+            YOUR REFERRAL LINK
+        </div>
+
+
+        <div
+            id="referral-link"
+            class="referral-link-box"
+        >
+            Generating referral link...
+        </div>
+
+
+        <button
+            class="copy-btn"
+            onclick="copyReferralLink()"
+        >
+            📋 COPY REFERRAL LINK
+        </button>
+
+
+        <button
+            class="share-btn"
+            onclick="shareReferralLink()"
+        >
+            🚀 SHARE WITH FRIENDS
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     WITHDRAW
+     ===================================================== -->
+
+<div
+    id="withdraw-screen"
+    class="screen"
+>
+
+    <div
+        class="balance-header"
+        style="margin-bottom:20px;"
+    >
+
+        <div class="balance-title">
+            WITHDRAW BALANCE
+        </div>
+
+        <div class="balance-amount">
+
+            <span id="withdraw-balance-val">
+                0
+            </span>
+
+            BONK
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+
+        <div class="input-group">
+
+            <label>
+                Binance Pay ID / User ID
+            </label>
+
+            <input
+                type="text"
+                id="binance-id"
+                placeholder="Enter your Binance ID"
+            >
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Amount (Min: 1,000 BONK)
+            </label>
+
+            <input
+                type="number"
+                id="withdraw-amount"
+                placeholder="Min 1000"
+            >
+
+        </div>
+
+
+        <button
+            id="withdraw-btn"
+            class="btn"
+            onclick="submitWithdrawal()"
+        >
+            Withdraw Now
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     ADMIN
+     ===================================================== -->
+
+<div
+    id="admin-screen"
+    class="screen"
+>
+
+    <div class="balance-header">
+
+        <div class="balance-title">
+            BONK ADMIN DASHBOARD
+        </div>
+
+        <div
+            class="balance-amount"
+            style="font-size:24px;"
+        >
+            Withdrawal Requests
+        </div>
+
+    </div>
+
+
+    <button
+        class="btn"
+        style="
+            width:auto;
+            padding:8px 16px;
+            margin-bottom:15px;
+        "
+        onclick="fetchWithdrawals()"
+    >
+        🔄 Refresh Requests
+    </button>
+
+
+    <table class="admin-table">
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Binance ID
+                </th>
+
+                <th>
+                    Amount
+                </th>
+
+                <th>
+                    Status
+                </th>
+
+                <th>
+                    Action
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="withdrawal-list">
+
+            <tr>
+
+                <td
+                    colspan="4"
+                    style="text-align:center;"
+                >
+                    Loading requests...
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+</div>
+
+
+
+<!-- =====================================================
+     AD MODAL
+     ===================================================== -->
+
 <div
     class="modal"
     id="instructionModal"
@@ -915,6 +1327,7 @@
         <div class="modal-title">
             ⚡ Refill Energy
         </div>
+
 
         <div class="modal-desc">
 
@@ -928,6 +1341,7 @@
 
         </div>
 
+
         <button
             class="modal-btn"
             onclick="startAdsterraAd()"
@@ -940,7 +1354,11 @@
 </div>
 
 
-<!-- FIRST-TIME WELCOME TASK POPUP -->
+
+<!-- =====================================================
+     WELCOME MODAL
+     ===================================================== -->
+
 <div
     class="modal"
     id="welcomeModal"
@@ -952,18 +1370,24 @@
             🎁 WELCOME BONUS
         </div>
 
+
         <div class="modal-desc">
 
-            complet this task and get 300 bonk now!!
+            complet this task and get
+            300 bonk now!!
 
             <br><br>
 
             <small style="color:var(--text-muted);">
-                clik on join now button start the bot
-                and bakc to the app and get reword
+
+                clik on join now button
+                start the bot and bakc to
+                the app and get reword
+
             </small>
 
         </div>
+
 
         <button
             id="welcome-modal-btn"
@@ -978,7 +1402,11 @@
 </div>
 
 
-<!-- NAVBAR -->
+
+<!-- =====================================================
+     NAVBAR
+     ===================================================== -->
+
 <div
     class="navbar"
     id="main-navbar"
@@ -987,7 +1415,7 @@
     <div
         class="nav-item active"
         id="nav-home"
-        onclick="switchScreen('home-screen', 'nav-home')"
+        onclick="switchScreen('home-screen','nav-home')"
     >
         HOME
     </div>
@@ -996,7 +1424,7 @@
     <div
         class="nav-item"
         id="nav-tasks"
-        onclick="switchScreen('tasks-screen', 'nav-tasks')"
+        onclick="switchScreen('tasks-screen','nav-tasks')"
     >
         TASKS
     </div>
@@ -1005,7 +1433,7 @@
     <div
         class="nav-item"
         id="nav-referral"
-        onclick="switchScreen('referral-screen', 'nav-referral')"
+        onclick="switchScreen('referral-screen','nav-referral')"
     >
         REFER
     </div>
@@ -1014,7 +1442,7 @@
     <div
         class="nav-item"
         id="nav-withdraw"
-        onclick="switchScreen('withdraw-screen', 'nav-withdraw')"
+        onclick="switchScreen('withdraw-screen','nav-withdraw')"
     >
         WITHDRAW
     </div>
@@ -1024,7 +1452,7 @@
         class="nav-item"
         id="nav-admin"
         style="display:none;"
-        onclick="switchScreen('admin-screen', 'nav-admin')"
+        onclick="switchScreen('admin-screen','nav-admin')"
     >
         ADMIN
     </div>
@@ -1032,700 +1460,1141 @@
 </div>
 
 
+
 <script>
 
-    const TASK_1_LINK =
-        "https://t.me/MetaCcx_bot?start=1912015558";
 
-    const TASK_2_LINK =
-        "https://t.me/SHIBAInuTapbot?start=1912015558";
+// =====================================================
+// CONFIG
+// =====================================================
 
-    const TASK_3_LINK =
-        "https://t.me/CryptoProUpRobot?start=Bot51728662";
+const TASK_1_LINK =
+    "https://t.me/MetaCcx_bot?start=1912015558";
 
-    const TASK_4_LINK =
-        "https://t.me/+gZEl6wYrSPY3YzRl";
+const TASK_2_LINK =
+    "https://t.me/SHIBAInuTapbot?start=1912015558";
 
-    const TASK_5_LINK =
-        "https://t.me/WolfRush_bot/wolf_rush_earn?startapp=8505916897";
+const TASK_3_LINK =
+    "https://t.me/CryptoProUpRobot?start=Bot51728662";
 
-    const TASK_6_LINK =
-        "https://t.me/Crypto_Insight_BD49";
+const TASK_4_LINK =
+    "https://t.me/+gZEl6wYrSPY3YzRl";
 
+const TASK_5_LINK =
+    "https://t.me/WolfRush_bot/wolf_rush_earn?startapp=8505916897";
 
-    const WELCOME_TASK_LINK =
-        "https://t.me/earn_doge_bywatchingads_bot?start=1912015558";
-
-
-    const ADSTERRA_DIRECT_LINK =
-        "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
+const TASK_6_LINK =
+    "https://t.me/Crypto_Insight_BD49";
 
 
-    const BACKEND_URL =
-        "https://pepe-backend-wkym.onrender.com";
+const WELCOME_TASK_LINK =
+    "https://t.me/earn_doge_bywatchingads_bot?start=1912015558";
 
 
-    const TELEGRAM_BOT_USERNAME =
-        "PEPE_Faucet_Airdrop_bot";
+const ADSTERRA_DIRECT_LINK =
+    "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
 
 
-    const MAX_XP = 300;
+const BACKEND_URL =
+    "https://pepe-backend-wkym.onrender.com";
 
-    const REFERRAL_REWARD = 300;
+
+const TELEGRAM_BOT_USERNAME =
+    "PEPE_Faucet_Airdrop_bot";
 
 
-    let balance =
-        parseInt(localStorage.getItem('bonk_balance'));
+const MAX_XP = 300;
 
-    if (isNaN(balance) || balance < 0) {
-        balance = 0;
+
+const REFERRAL_REWARD = 300;
+
+
+// =====================================================
+// TELEGRAM
+// =====================================================
+
+let telegramUser = null;
+
+
+if (
+    window.Telegram &&
+    window.Telegram.WebApp
+) {
+
+    window.Telegram.WebApp.ready();
+
+    window.Telegram.WebApp.expand();
+
+
+    telegramUser =
+        window.Telegram.WebApp
+            .initDataUnsafe &&
+        window.Telegram.WebApp
+            .initDataUnsafe.user
+            ? window.Telegram.WebApp
+                .initDataUnsafe.user
+            : null;
+
+}
+
+
+// =====================================================
+// UNIQUE TELEGRAM USER STORAGE
+// =====================================================
+
+const telegramUserId =
+    telegramUser &&
+    telegramUser.id
+        ? String(telegramUser.id)
+        : "guest";
+
+
+/*
+    IMPORTANT
+
+    Account A:
+    bonk_balance_123456
+
+    Account B:
+    bonk_balance_987654
+
+    Therefore their balances
+    are completely separate.
+*/
+
+const BALANCE_KEY =
+    `bonk_balance_${telegramUserId}`;
+
+
+const XP_KEY =
+    `bonk_xp_${telegramUserId}`;
+
+
+const REFERRAL_PROCESSED_KEY =
+    `bonk_referral_processed_${telegramUserId}`;
+
+
+const WELCOME_TASK_KEY =
+    `welcome_task_status_${telegramUserId}`;
+
+
+// =====================================================
+// BALANCE
+// =====================================================
+
+let balance =
+    parseInt(
+        localStorage.getItem(
+            BALANCE_KEY
+        )
+    );
+
+
+if (
+    isNaN(balance) ||
+    balance < 0
+) {
+
+    balance = 0;
+
+}
+
+
+// =====================================================
+// XP
+// =====================================================
+
+let xp =
+    parseInt(
+        localStorage.getItem(
+            XP_KEY
+        )
+    );
+
+
+if (
+    isNaN(xp) ||
+    xp < 0 ||
+    xp > MAX_XP
+) {
+
+    xp = MAX_XP;
+
+}
+
+
+// =====================================================
+// OTHER VARIABLES
+// =====================================================
+
+let adStartTime = 0;
+
+let isTrackingAd = false;
+
+let isWithdrawSubmitting = false;
+
+let referralCode = null;
+
+let referralLink = null;
+
+
+// =====================================================
+// SAVE BALANCE
+// =====================================================
+
+function saveBalance() {
+
+    localStorage.setItem(
+        BALANCE_KEY,
+        String(balance)
+    );
+
+}
+
+
+// =====================================================
+// SAVE XP
+// =====================================================
+
+function saveXP() {
+
+    localStorage.setItem(
+        XP_KEY,
+        String(xp)
+    );
+
+}
+
+
+// =====================================================
+// REFERRAL CODE
+// =====================================================
+
+function generateReferralCode() {
+
+    if (
+        telegramUser &&
+        telegramUser.id
+    ) {
+
+        return (
+            "U" +
+            String(
+                telegramUser.id
+            )
+        );
+
     }
 
 
-    let xp =
-        parseInt(localStorage.getItem('bonk_xp'));
+    let localCode =
+        localStorage.getItem(
+            'bonk_referral_code'
+        );
 
-    if (isNaN(xp) || xp > MAX_XP) {
-        xp = MAX_XP;
+
+    if (!localCode) {
+
+        localCode =
+            "U" +
+            Math.random()
+                .toString(36)
+                .substring(2,10)
+                .toUpperCase();
+
+
+        localStorage.setItem(
+            'bonk_referral_code',
+            localCode
+        );
+
     }
 
 
-    let adStartTime = 0;
+    return localCode;
 
-    let isTrackingAd = false;
-
-    let isWithdrawSubmitting = false;
+}
 
 
-    /* =========================================
-       TELEGRAM
-    ========================================= */
+// =====================================================
+// INITIALIZE REFERRAL
+// =====================================================
 
-    let telegramUser = null;
+function initializeReferral() {
+
+    referralCode =
+        generateReferralCode();
+
+
+    referralLink =
+        "https://t.me/" +
+        TELEGRAM_BOT_USERNAME +
+        "?start=" +
+        referralCode;
+
+
+    const linkElement =
+        document.getElementById(
+            'referral-link'
+        );
+
+
+    if (linkElement) {
+
+        linkElement.innerText =
+            referralLink;
+
+    }
+
+
+    loadReferralStats();
+
+
+    /*
+        Process incoming referral first.
+    */
+
+    processIncomingReferral();
+
+
+    /*
+        Then check if THIS user is
+        a referrer and has pending
+        300 BONK reward.
+    */
+
+    setTimeout(
+        () => {
+
+            claimReferralReward();
+
+        },
+        1000
+    );
+
+}
+
+
+// =====================================================
+// GET TELEGRAM START PARAMETER
+// =====================================================
+
+function getTelegramStartParameter() {
 
     if (
         window.Telegram &&
-        window.Telegram.WebApp
+        window.Telegram.WebApp &&
+        window.Telegram.WebApp.initDataUnsafe
     ) {
 
-        window.Telegram.WebApp.ready();
-
-        window.Telegram.WebApp.expand();
-
-        telegramUser =
-            window.Telegram.WebApp.initDataUnsafe &&
-            window.Telegram.WebApp.initDataUnsafe.user
-                ? window.Telegram.WebApp.initDataUnsafe.user
-                : null;
-    }
+        const startParam =
+            window.Telegram.WebApp
+                .initDataUnsafe
+                .start_param;
 
 
-    /* =========================================
-       REFERRAL SYSTEM
-    ========================================= */
+        if (startParam) {
 
-    let referralCode = null;
-
-    let referralLink = null;
-
-
-    function generateReferralCode() {
-
-        if (telegramUser && telegramUser.id) {
-
-            return "U" + telegramUser.id;
+            return startParam;
 
         }
 
-        let localCode =
-            localStorage.getItem('bonk_referral_code');
+    }
 
-        if (!localCode) {
 
-            localCode =
-                "U" +
-                Math.random()
-                    .toString(36)
-                    .substring(2, 10)
-                    .toUpperCase();
+    const urlParams =
+        new URLSearchParams(
+            window.location.search
+        );
 
-            localStorage.setItem(
-                'bonk_referral_code',
-                localCode
+
+    return (
+        urlParams.get('start') ||
+        urlParams.get('startapp') ||
+        null
+    );
+
+}
+
+
+// =====================================================
+// PROCESS INCOMING REFERRAL
+// =====================================================
+
+function processIncomingReferral() {
+
+    const incomingCode =
+        getTelegramStartParameter();
+
+
+    if (!incomingCode) {
+
+        return;
+
+    }
+
+
+    if (
+        !telegramUser ||
+        !telegramUser.id
+    ) {
+
+        console.log(
+            "Telegram user not available."
+        );
+
+        return;
+
+    }
+
+
+    const ownCode =
+        "U" +
+        String(
+            telegramUser.id
+        );
+
+
+    /*
+        Prevent self referral
+    */
+
+    if (
+        incomingCode.toUpperCase() ===
+        ownCode.toUpperCase()
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+        Do not send the same referral
+        again from this device/account.
+    */
+
+    const alreadyProcessed =
+        localStorage.getItem(
+            REFERRAL_PROCESSED_KEY
+        );
+
+
+    if (alreadyProcessed) {
+
+        return;
+
+    }
+
+
+    fetch(
+        `${BACKEND_URL}/api/bonk/referral`,
+        {
+
+            method: 'POST',
+
+            headers: {
+                'Content-Type':
+                    'application/json'
+            },
+
+            body: JSON.stringify({
+
+                userId:
+                    String(
+                        telegramUser.id
+                    ),
+
+                referralCode:
+                    incomingCode
+
+            })
+
+        }
+    )
+    .then(
+        response => {
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Referral request failed"
+                );
+
+            }
+
+            return response.json();
+
+        }
+    )
+    .then(
+        data => {
+
+            console.log(
+                "Referral response:",
+                data
             );
-        }
 
-        return localCode;
+
+            if (
+                data &&
+                data.success
+            ) {
+
+                /*
+                    IMPORTANT:
+
+                    Do NOT add 300 BONK
+                    to this new user.
+
+                    300 BONK goes to
+                    the referrer.
+                */
+
+                localStorage.setItem(
+                    REFERRAL_PROCESSED_KEY,
+                    "true"
+                );
+
+            }
+
+        }
+    )
+    .catch(
+        error => {
+
+            console.log(
+                "Referral processing error:",
+                error
+            );
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// CLAIM REFERRER REWARD
+// =====================================================
+
+function claimReferralReward() {
+
+    if (
+        !telegramUser ||
+        !telegramUser.id
+    ) {
+
+        return;
+
     }
 
 
-    function initializeReferral() {
+    fetch(
+        `${BACKEND_URL}/api/bonk/referral/claim`,
+        {
 
-        referralCode =
-            generateReferralCode();
+            method: 'POST',
 
+            headers: {
+                'Content-Type':
+                    'application/json'
+            },
 
-        referralLink =
-            "https://t.me/" +
-            TELEGRAM_BOT_USERNAME +
-            "?start=" +
-            referralCode;
+            body: JSON.stringify({
 
+                userId:
+                    String(
+                        telegramUser.id
+                    )
 
-        const linkElement =
-            document.getElementById('referral-link');
+            })
 
-        if (linkElement) {
-
-            linkElement.innerText =
-                referralLink;
         }
+    )
+    .then(
+        response => {
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Claim request failed"
+                );
+
+            }
+
+            return response.json();
+
+        }
+    )
+    .then(
+        data => {
+
+            console.log(
+                "Referral claim response:",
+                data
+            );
 
 
-        loadReferralStats();
+            if (
+                !data ||
+                !data.success
+            ) {
 
-        processIncomingReferral();
+                return;
+
+            }
+
+
+            const reward =
+                Number(
+                    data.reward || 0
+                );
+
+
+            if (
+                reward <= 0
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+                This is the IMPORTANT part.
+
+                The referrer gets the
+                pending reward.
+
+                Existing balance is preserved.
+            */
+
+            balance += reward;
+
+
+            saveBalance();
+
+
+            updateUI();
+
+
+            loadReferralStats();
+
+
+            alert(
+                "🎉 Referral Reward!\n\n" +
+                "You received " +
+                reward.toLocaleString() +
+                " BONK."
+            );
+
+        }
+    )
+    .catch(
+        error => {
+
+            console.log(
+                "Referral claim error:",
+                error
+            );
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// COPY REFERRAL
+// =====================================================
+
+function copyReferralLink() {
+
+    if (!referralLink) {
+
+        alert(
+            "Referral link is not ready yet."
+        );
+
+        return;
+
     }
 
 
-    function copyReferralLink() {
+    if (
+        navigator.clipboard &&
+        navigator.clipboard.writeText
+    ) {
 
-        if (!referralLink) {
-
-            alert("Referral link is not ready yet.");
-
-            return;
-        }
-
-
-        if (
-            navigator.clipboard &&
-            navigator.clipboard.writeText
-        ) {
-
-            navigator.clipboard
-                .writeText(referralLink)
-                .then(() => {
+        navigator.clipboard
+            .writeText(
+                referralLink
+            )
+            .then(
+                () => {
 
                     alert(
                         "✅ Referral link copied!"
                     );
 
-                })
-                .catch(() => {
+                }
+            )
+            .catch(
+                () => {
 
                     fallbackCopyReferralLink();
 
-                });
+                }
+            );
 
-        } else {
+    }
 
-            fallbackCopyReferralLink();
+    else {
 
-        }
+        fallbackCopyReferralLink();
+
+    }
+
+}
+
+
+// =====================================================
+// FALLBACK COPY
+// =====================================================
+
+function fallbackCopyReferralLink() {
+
+    const textarea =
+        document.createElement(
+            'textarea'
+        );
+
+
+    textarea.value =
+        referralLink;
+
+
+    document.body.appendChild(
+        textarea
+    );
+
+
+    textarea.select();
+
+
+    try {
+
+        document.execCommand(
+            'copy'
+        );
+
+
+        alert(
+            "✅ Referral link copied!"
+        );
+
+    }
+
+    catch (error) {
+
+        alert(
+            "Please copy the referral link manually."
+        );
 
     }
 
 
-    function fallbackCopyReferralLink() {
+    textarea.remove();
 
-        const textarea =
-            document.createElement('textarea');
+}
 
-        textarea.value = referralLink;
 
-        document.body.appendChild(textarea);
+// =====================================================
+// SHARE REFERRAL
+// =====================================================
 
-        textarea.select();
+function shareReferralLink() {
 
-        try {
+    if (!referralLink) {
 
-            document.execCommand('copy');
+        alert(
+            "Referral link is not ready yet."
+        );
 
-            alert(
-                "✅ Referral link copied!"
-            );
+        return;
 
-        } catch (error) {
-
-            alert(
-                "Please copy the referral link manually."
-            );
-
-        }
-
-        textarea.remove();
     }
 
 
-    function shareReferralLink() {
-
-        if (!referralLink) {
-
-            alert("Referral link is not ready yet.");
-
-            return;
-        }
+    const shareText =
+        "🚀 Join BONK Tap & Earn BONK!\n\n" +
+        "🎁 Join using my referral link!\n\n" +
+        referralLink;
 
 
-        const shareText =
-            "🚀 Join BONK Tap & Earn BONK!\n\n" +
-            "🎁 Use my referral link and start earning BONK!\n\n" +
-            referralLink;
+    if (
+        window.Telegram &&
+        window.Telegram.WebApp &&
+        window.Telegram.WebApp.openTelegramLink
+    ) {
+
+        const shareUrl =
+            "https://t.me/share/url?url=" +
+            encodeURIComponent(
+                referralLink
+            ) +
+            "&text=" +
+            encodeURIComponent(
+                "🚀 Join BONK Tap & Earn BONK!"
+            );
 
 
-        if (
-            window.Telegram &&
-            window.Telegram.WebApp &&
-            window.Telegram.WebApp.openTelegramLink
-        ) {
-
-            const shareUrl =
-                "https://t.me/share/url?url=" +
-                encodeURIComponent(referralLink) +
-                "&text=" +
-                encodeURIComponent(
-                    "🚀 Join BONK Tap & Earn BONK!"
-                );
-
-
-            window.Telegram.WebApp.openTelegramLink(
+        window.Telegram.WebApp
+            .openTelegramLink(
                 shareUrl
             );
 
-            return;
-        }
 
+        return;
 
-        if (navigator.share) {
-
-            navigator.share({
-
-                title: "BONK Tap",
-
-                text: shareText,
-
-                url: referralLink
-
-            }).catch(() => {});
-
-            return;
-        }
-
-
-        copyReferralLink();
     }
 
 
-    function getTelegramStartParameter() {
+    if (
+        navigator.share
+    ) {
 
-        if (
-            window.Telegram &&
-            window.Telegram.WebApp &&
-            window.Telegram.WebApp.initDataUnsafe
-        ) {
+        navigator.share({
 
-            return (
-                window.Telegram.WebApp
-                    .initDataUnsafe
-                    .start_param || null
-            );
+            title:
+                "BONK Tap",
 
-        }
+            text:
+                shareText,
 
+            url:
+                referralLink
 
-        const urlParams =
-            new URLSearchParams(
-                window.location.search
-            );
-
-
-        return (
-            urlParams.get('start') ||
-            urlParams.get('startapp') ||
-            null
+        }).catch(
+            () => {}
         );
-    }
 
 
-    function processIncomingReferral() {
-
-        const incomingCode =
-            getTelegramStartParameter();
-
-
-        if (!incomingCode) {
-            return;
-        }
-
-
-        const ownCode =
-            referralCode;
-
-
-        if (
-            incomingCode.toUpperCase() ===
-            ownCode.toUpperCase()
-        ) {
-
-            return;
-        }
-
-
-        const alreadyProcessed =
-            localStorage.getItem(
-                'bonk_referral_processed'
-            );
-
-
-        if (alreadyProcessed) {
-            return;
-        }
-
-
-        const userId =
-            telegramUser && telegramUser.id
-                ? String(telegramUser.id)
-                : null;
-
-
-        if (!userId) {
-
-            return;
-        }
-
-
-        fetch(
-            `${BACKEND_URL}/api/bonk/referral`,
-            {
-                method: 'POST',
-
-                headers: {
-                    'Content-Type':
-                        'application/json'
-                },
-
-                body: JSON.stringify({
-
-                    userId: userId,
-
-                    referralCode:
-                        incomingCode,
-
-                    reward:
-                        REFERRAL_REWARD
-
-                })
-            }
-        )
-        .then(res => res.json())
-        .then(data => {
-
-            if (data && data.success) {
-
-                localStorage.setItem(
-                    'bonk_referral_processed',
-                    'true'
-                );
-
-
-                if (
-                    data.rewardAdded
-                ) {
-
-                    balance +=
-                        REFERRAL_REWARD;
-
-                    localStorage.setItem(
-                        'bonk_balance',
-                        balance
-                    );
-
-                    updateUI();
-
-
-                    alert(
-                        "🎉 Referral Bonus!\n\n" +
-                        "You received " +
-                        REFERRAL_REWARD +
-                        " BONK."
-                    );
-
-                }
-
-            }
-
-        })
-        .catch(err => {
-
-            console.log(
-                "Referral processing error:",
-                err
-            );
-
-        });
+        return;
 
     }
 
 
-    function loadReferralStats() {
+    copyReferralLink();
 
-        const userId =
-            telegramUser && telegramUser.id
-                ? String(telegramUser.id)
-                : null;
+}
 
 
-        if (!userId) {
+// =====================================================
+// REFERRAL STATS
+// =====================================================
 
-            const savedCount =
-                parseInt(
-                    localStorage.getItem(
-                        'bonk_referral_count'
-                    )
-                ) || 0;
+function loadReferralStats() {
 
+    if (
+        !telegramUser ||
+        !telegramUser.id
+    ) {
 
-            const savedEarned =
-                parseInt(
-                    localStorage.getItem(
-                        'bonk_referral_earned'
-                    )
-                ) || 0;
+        return;
+
+    }
 
 
-            document.getElementById(
-                'referral-count'
-            ).innerText = savedCount;
+    fetch(
+        `${BACKEND_URL}/api/bonk/referral/stats/${encodeURIComponent(
+            telegramUser.id
+        )}`
+    )
+    .then(
+        response => {
 
+            if (!response.ok) {
 
-            document.getElementById(
-                'referral-earned'
-            ).innerText = savedEarned;
-
-
-            return;
-        }
-
-
-        fetch(
-            `${BACKEND_URL}/api/bonk/referral/stats/${encodeURIComponent(userId)}`
-        )
-        .then(res => {
-
-            if (!res.ok) {
                 throw new Error(
                     "Stats request failed"
                 );
+
             }
 
-            return res.json();
+            return response.json();
 
-        })
-        .then(data => {
+        }
+    )
+    .then(
+        data => {
 
             if (!data) {
                 return;
             }
 
 
-            const count =
-                Number(
-                    data.referralCount ||
-                    data.totalReferrals ||
-                    0
-                );
-
-
-            const earned =
-                Number(
-                    data.referralEarned ||
-                    data.totalEarned ||
-                    0
-                );
-
-
             document.getElementById(
                 'referral-count'
             ).innerText =
-                count.toLocaleString();
+                Number(
+                    data.referralCount || 0
+                ).toLocaleString();
 
 
             document.getElementById(
                 'referral-earned'
             ).innerText =
-                earned.toLocaleString();
+                Number(
+                    data.referralEarned || 0
+                ).toLocaleString();
 
-        })
-        .catch(err => {
+        }
+    )
+    .catch(
+        error => {
 
             console.log(
                 "Referral stats error:",
-                err
+                error
             );
 
-        });
+        }
+    );
+
+}
+
+
+// =====================================================
+// UI
+// =====================================================
+
+function updateUI() {
+
+    const balanceElement =
+        document.getElementById(
+            'balance-val'
+        );
+
+
+    const withdrawBalanceElement =
+        document.getElementById(
+            'withdraw-balance-val'
+        );
+
+
+    if (balanceElement) {
+
+        balanceElement.innerText =
+            balance.toLocaleString();
 
     }
 
 
-    /* =========================================
-       MAIN UI
-    ========================================= */
+    if (withdrawBalanceElement) {
 
-    function updateUI() {
-
-        document.getElementById(
-            'balance-val'
-        ).innerText =
+        withdrawBalanceElement.innerText =
             balance.toLocaleString();
 
-
-        document.getElementById(
-            'withdraw-balance-val'
-        ).innerText =
-            balance.toLocaleString();
+    }
 
 
+    const xpElement =
         document.getElementById(
             'xp-val'
-        ).innerText =
+        );
+
+
+    if (xpElement) {
+
+        xpElement.innerText =
             xp;
 
-
-        let fillPercentage =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    (xp / MAX_XP) * 100
-                )
-            );
+    }
 
 
+    const fillPercentage =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                (xp / MAX_XP) * 100
+            )
+        );
+
+
+    const fillElement =
         document.getElementById(
             'xp-fill'
-        ).style.width =
+        );
+
+
+    if (fillElement) {
+
+        fillElement.style.width =
             fillPercentage + '%';
 
+    }
 
-        const adBtn =
-            document.getElementById(
-                'ad-btn'
-            );
 
+    const adBtn =
+        document.getElementById(
+            'ad-btn'
+        );
+
+
+    if (adBtn) {
 
         if (xp <= 0) {
 
             adBtn.disabled = false;
 
-        } else {
+        }
+
+        else {
 
             adBtn.disabled = true;
 
         }
 
-
-        updateTaskButtons();
-
     }
 
 
-    function handleTap() {
+    updateTaskButtons();
 
-        if (xp >= 10) {
-
-            balance += 1;
-
-            xp -= 10;
+}
 
 
-            localStorage.setItem(
-                'bonk_balance',
-                balance
-            );
+// =====================================================
+// TAP
+// =====================================================
+
+function handleTap() {
+
+    if (xp >= 10) {
+
+        balance += 1;
+
+        xp -= 10;
 
 
-            localStorage.setItem(
-                'bonk_xp',
-                xp
-            );
+        saveBalance();
+
+        saveXP();
 
 
-            updateUI();
-
-        } else {
-
-            alert(
-                "Out of Energy! Watch Ad to refill."
-            );
-
-        }
+        updateUI();
 
     }
 
+    else {
 
-    /* =========================================
-       ADS
-    ========================================= */
-
-    function openInstructionModal() {
-
-        if (xp > 0) {
-            return;
-        }
-
-
-        document.getElementById(
-            "instructionModal"
-        ).style.display = "flex";
-
-    }
-
-
-    function closeInstructionModal() {
-
-        document.getElementById(
-            "instructionModal"
-        ).style.display = "none";
-
-    }
-
-
-    function startAdsterraAd() {
-
-        closeInstructionModal();
-
-
-        const adBtn =
-            document.getElementById(
-                'ad-btn'
-            );
-
-
-        adBtn.disabled = true;
-
-        adBtn.innerText =
-            "⏳ Watching Ad...";
-
-
-        adStartTime =
-            Date.now();
-
-
-        isTrackingAd = true;
-
-
-        openExternalLink(
-            ADSTERRA_DIRECT_LINK
+        alert(
+            "Out of Energy! Watch Ad to refill."
         );
 
     }
 
+}
 
-    window.addEventListener(
-        'focus',
-        () => {
+
+// =====================================================
+// AD MODAL
+// =====================================================
+
+function openInstructionModal() {
+
+    if (xp > 0) {
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "instructionModal"
+    ).style.display =
+        "flex";
+
+}
+
+
+function closeInstructionModal() {
+
+    document.getElementById(
+        "instructionModal"
+    ).style.display =
+        "none";
+
+}
+
+
+// =====================================================
+// START AD
+// =====================================================
+
+function startAdsterraAd() {
+
+    closeInstructionModal();
+
+
+    const adBtn =
+        document.getElementById(
+            'ad-btn'
+        );
+
+
+    adBtn.disabled = true;
+
+
+    adBtn.innerText =
+        "⏳ Watching Ad...";
+
+
+    adStartTime =
+        Date.now();
+
+
+    isTrackingAd = true;
+
+
+    openExternalLink(
+        ADSTERRA_DIRECT_LINK
+    );
+
+}
+
+
+// =====================================================
+// AD RETURN
+// =====================================================
+
+window.addEventListener(
+    'focus',
+    () => {
+
+        if (isTrackingAd) {
+
+            verifyAdRules();
+
+        }
+
+
+        checkWelcomeTaskReturn();
+
+    }
+);
+
+
+document.addEventListener(
+    'visibilitychange',
+    () => {
+
+        if (
+            document.visibilityState ===
+            'visible'
+        ) {
 
             if (isTrackingAd) {
 
@@ -1733,368 +2602,378 @@
 
             }
 
+
             checkWelcomeTaskReturn();
 
         }
+
+    }
+);
+
+
+// =====================================================
+// VERIFY AD
+// =====================================================
+
+function verifyAdRules() {
+
+    if (!isTrackingAd) {
+
+        return;
+
+    }
+
+
+    const totalWatchDuration =
+        (
+            Date.now() -
+            adStartTime
+        ) / 1000;
+
+
+    isTrackingAd = false;
+
+
+    if (
+        totalWatchDuration < 8
+    ) {
+
+        alert(
+            "⚠️ Verification Failed!\n" +
+            "Aapko kam se kam 8 second ad dekhna zaroori hai."
+        );
+
+
+        resetAdButtonState();
+
+
+        return;
+
+    }
+
+
+    xp = MAX_XP;
+
+
+    saveXP();
+
+
+    updateUI();
+
+
+    fetch(
+        `${BACKEND_URL}/api/bonk/recharge-energy`,
+        {
+
+            method: 'POST',
+
+            headers: {
+                'Content-Type':
+                    'application/json'
+            },
+
+            body: JSON.stringify({
+
+                userId:
+                    telegramUserId,
+
+                energyAmount:
+                    MAX_XP
+
+            })
+
+        }
+    )
+    .catch(
+        () => {}
     );
 
 
-    document.addEventListener(
-        'visibilitychange',
-        () => {
-
-            if (
-                document.visibilityState ===
-                'visible'
-            ) {
-
-                if (isTrackingAd) {
-
-                    verifyAdRules();
-
-                }
-
-                checkWelcomeTaskReturn();
-
-            }
-
-        }
+    alert(
+        "⚡ Energy Refilled to 300 XP!"
     );
 
 
-    function verifyAdRules() {
+    resetAdButtonState();
 
-        if (!isTrackingAd) {
-            return;
-        }
+}
 
 
-        const totalWatchDuration =
-            (Date.now() - adStartTime) / 1000;
+// =====================================================
+// RESET AD BUTTON
+// =====================================================
+
+function resetAdButtonState() {
+
+    isTrackingAd = false;
 
 
-        isTrackingAd = false;
+    const adBtn =
+        document.getElementById(
+            'ad-btn'
+        );
 
 
-        if (totalWatchDuration < 8) {
-
-            alert(
-                "⚠️ Verification Failed!\n" +
-                "Aapko kam se kam 8 second ad dekhna zaroori hai."
-            );
+    adBtn.innerText =
+        "🎬 Watch Ads & Full Energy (+300 XP)";
 
 
-            resetAdButtonState();
+    adBtn.disabled =
+        xp > 0;
 
-            return;
-        }
+}
 
 
-        xp = MAX_XP;
+// =====================================================
+// WELCOME TASK
+// =====================================================
+
+function checkWelcomeModal() {
+
+    const status =
+        localStorage.getItem(
+            WELCOME_TASK_KEY
+        );
+
+
+    if (!status) {
+
+        document.getElementById(
+            'welcomeModal'
+        ).style.display =
+            'flex';
+
+    }
+
+    else if (
+        status === 'visited'
+    ) {
+
+        document.getElementById(
+            'welcomeModal'
+        ).style.display =
+            'flex';
+
+
+        setWelcomeBtnToClaim();
+
+    }
+
+}
+
+
+function setWelcomeBtnToClaim() {
+
+    const btn =
+        document.getElementById(
+            'welcome-modal-btn'
+        );
+
+
+    btn.innerText =
+        "CLAIM NOW";
+
+
+    btn.style.background =
+        "#28a745";
+
+
+    btn.style.color =
+        "#ffffff";
+
+}
+
+
+// =====================================================
+// WELCOME TASK ACTION
+// =====================================================
+
+function handleWelcomeTask() {
+
+    const status =
+        localStorage.getItem(
+            WELCOME_TASK_KEY
+        );
+
+
+    if (
+        status === 'visited'
+    ) {
+
+        balance += 300;
+
+
+        saveBalance();
 
 
         localStorage.setItem(
-            'bonk_xp',
-            MAX_XP
+            WELCOME_TASK_KEY,
+            'claimed'
         );
 
 
         updateUI();
 
 
-        fetch(
-            `${BACKEND_URL}/api/bonk/recharge-energy`,
-            {
-                method: 'POST',
-
-                headers: {
-                    'Content-Type':
-                        'application/json'
-                },
-
-                body: JSON.stringify({
-
-                    energyAmount:
-                        MAX_XP
-
-                })
-
-            }
-        )
-        .catch(
-            err =>
-                console.log(
-                    'Backend sync error ignored'
-                )
-        );
+        document.getElementById(
+            'welcomeModal'
+        ).style.display =
+            'none';
 
 
         alert(
-            "⚡ Energy Refilled to 300 XP!"
+            "🎉 Congratulations! You received 300 BONK!"
+        );
+
+    }
+
+    else {
+
+        localStorage.setItem(
+            WELCOME_TASK_KEY,
+            'visited'
         );
 
 
-        resetAdButtonState();
+        setWelcomeBtnToClaim();
+
+
+        openExternalLink(
+            WELCOME_TASK_LINK
+        );
 
     }
 
+}
 
-    function resetAdButtonState() {
 
-        isTrackingAd = false;
+// =====================================================
+// CHECK WELCOME RETURN
+// =====================================================
 
+function checkWelcomeTaskReturn() {
 
-        const adBtn =
-            document.getElementById(
-                'ad-btn'
-            );
+    const status =
+        localStorage.getItem(
+            WELCOME_TASK_KEY
+        );
 
 
-        adBtn.innerText =
-            "🎬 Watch Ads & Full Energy (+300 XP)";
-
-
-        if (xp <= 0) {
-
-            adBtn.disabled = false;
-
-        } else {
-
-            adBtn.disabled = true;
-
-        }
-
-    }
-
-
-    /* =========================================
-       WELCOME TASK
-    ========================================= */
-
-    function checkWelcomeModal() {
-
-        const status =
-            localStorage.getItem(
-                'welcome_task_status'
-            );
-
-
-        if (!status) {
-
-            document.getElementById(
-                'welcomeModal'
-            ).style.display = 'flex';
-
-        }
-
-        else if (
-            status === 'visited'
-        ) {
-
-            document.getElementById(
-                'welcomeModal'
-            ).style.display = 'flex';
-
-
-            setWelcomeBtnToClaim();
-
-        }
-
-    }
-
-
-    function setWelcomeBtnToClaim() {
-
-        const btn =
-            document.getElementById(
-                'welcome-modal-btn'
-            );
-
-
-        btn.innerText =
-            "CLAIM NOW";
-
-
-        btn.style.background =
-            "#28a745";
-
-
-        btn.style.color =
-            "#ffffff";
-
-    }
-
-
-    function handleWelcomeTask() {
-
-        const status =
-            localStorage.getItem(
-                'welcome_task_status'
-            );
-
-
-        if (status === 'visited') {
-
-            balance += 300;
-
-
-            localStorage.setItem(
-                'bonk_balance',
-                balance
-            );
-
-
-            localStorage.setItem(
-                'welcome_task_status',
-                'claimed'
-            );
-
-
-            updateUI();
-
-
-            document.getElementById(
-                'welcomeModal'
-            ).style.display = 'none';
-
-
-            alert(
-                "🎉 Congratulations! You received 300 BONK!"
-            );
-
-        }
-
-        else {
-
-            localStorage.setItem(
-                'welcome_task_status',
-                'visited'
-            );
-
-
-            setWelcomeBtnToClaim();
-
-
-            openExternalLink(
-                WELCOME_TASK_LINK
-            );
-
-        }
-
-    }
-
-
-    function checkWelcomeTaskReturn() {
-
-        const status =
-            localStorage.getItem(
-                'welcome_task_status'
-            );
-
-
-        if (
-            status === 'visited'
-        ) {
-
-            const modal =
-                document.getElementById(
-                    'welcomeModal'
-                );
-
-
-            if (modal) {
-
-                modal.style.display =
-                    'flex';
-
-
-                setWelcomeBtnToClaim();
-
-            }
-
-        }
-
-    }
-
-
-    /* =========================================
-       TASKS
-    ========================================= */
-
-    function handleTaskAction(
-        taskId,
-        reward,
-        linkUrl
+    if (
+        status === 'visited'
     ) {
 
-        const status =
-            localStorage.getItem(
-                `task_status_${taskId}`
+        const modal =
+            document.getElementById(
+                'welcomeModal'
             );
 
 
-        if (status === 'claimed') {
-            return;
-        }
+        if (modal) {
+
+            modal.style.display =
+                'flex';
 
 
-        if (status === 'visited') {
-
-            balance += reward;
-
-
-            localStorage.setItem(
-                'bonk_balance',
-                balance
-            );
-
-
-            localStorage.setItem(
-                `task_status_${taskId}`,
-                'claimed'
-            );
-
-
-            updateUI();
-
-
-            alert(
-                `✅ Task Completed! You received ${reward} BONK.`
-            );
-
-        }
-
-        else {
-
-            localStorage.setItem(
-                `task_status_${taskId}`,
-                'visited'
-            );
-
-
-            updateTaskButtons();
-
-
-            openExternalLink(
-                linkUrl
-            );
+            setWelcomeBtnToClaim();
 
         }
 
     }
 
+}
 
-    function updateTaskButtons() {
 
-        [
-            'video',
-            'partner',
-            'cryptopro',
-            'cryptoincome',
-            'wolfrush',
-            'cryptoinsight'
-        ]
-        .forEach(taskId => {
+// =====================================================
+// TASK ACTION
+// =====================================================
+
+function handleTaskAction(
+    taskId,
+    reward,
+    linkUrl
+) {
+
+    const taskKey =
+        `task_status_${telegramUserId}_${taskId}`;
+
+
+    const status =
+        localStorage.getItem(
+            taskKey
+        );
+
+
+    if (
+        status === 'claimed'
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        status === 'visited'
+    ) {
+
+        balance += reward;
+
+
+        saveBalance();
+
+
+        localStorage.setItem(
+            taskKey,
+            'claimed'
+        );
+
+
+        updateUI();
+
+
+        alert(
+            `✅ Task Completed! You received ${reward} BONK.`
+        );
+
+    }
+
+    else {
+
+        localStorage.setItem(
+            taskKey,
+            'visited'
+        );
+
+
+        updateTaskButtons();
+
+
+        openExternalLink(
+            linkUrl
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// TASK BUTTONS
+// =====================================================
+
+function updateTaskButtons() {
+
+    [
+        'video',
+        'partner',
+        'cryptopro',
+        'cryptoincome',
+        'wolfrush',
+        'cryptoinsight'
+    ]
+    .forEach(
+        taskId => {
 
             const btn =
                 document.getElementById(
@@ -2103,13 +2982,19 @@
 
 
             if (!btn) {
+
                 return;
+
             }
+
+
+            const taskKey =
+                `task_status_${telegramUserId}_${taskId}`;
 
 
             const status =
                 localStorage.getItem(
-                    `task_status_${taskId}`
+                    taskKey
                 );
 
 
@@ -2125,7 +3010,8 @@
                     'btn-sm btn-done';
 
 
-                btn.disabled = true;
+                btn.disabled =
+                    true;
 
             }
 
@@ -2141,7 +3027,8 @@
                     'btn-sm btn-approve';
 
 
-                btn.disabled = false;
+                btn.disabled =
+                    false;
 
             }
 
@@ -2155,259 +3042,315 @@
                     'btn-sm btn-start';
 
 
-                btn.disabled = false;
+                btn.disabled =
+                    false;
 
             }
 
-        });
-
-    }
-
-
-    /* =========================================
-       EXTERNAL LINK
-    ========================================= */
-
-    function openExternalLink(url) {
-
-        if (
-            window.Telegram &&
-            window.Telegram.WebApp &&
-            window.Telegram.WebApp.openLink
-        ) {
-
-            window.Telegram.WebApp.openLink(
-                url
-            );
-
         }
+    );
 
-        else {
-
-            window.open(
-                url,
-                '_blank'
-            );
-
-        }
-
-    }
+}
 
 
-    /* =========================================
-       SCREEN SWITCHING
-    ========================================= */
+// =====================================================
+// OPEN EXTERNAL LINK
+// =====================================================
 
-    function switchScreen(
-        screenId,
-        navId
+function openExternalLink(url) {
+
+    if (
+        window.Telegram &&
+        window.Telegram.WebApp &&
+        window.Telegram.WebApp.openLink
     ) {
 
-        document
-            .querySelectorAll('.screen')
-            .forEach(
-                s =>
-                    s.classList.remove(
-                        'active'
-                    )
-            );
-
-
-        document
-            .querySelectorAll('.nav-item')
-            .forEach(
-                n =>
-                    n.classList.remove(
-                        'active'
-                    )
-            );
-
-
-        document
-            .getElementById(screenId)
-            .classList.add('active');
-
-
-        if (
-            document.getElementById(navId)
-        ) {
-
-            document
-                .getElementById(navId)
-                .classList.add('active');
-
-        }
-
-
-        if (
-            screenId ===
-            'admin-screen'
-        ) {
-
-            fetchWithdrawals();
-
-        }
-
-        else if (
-            screenId ===
-            'referral-screen'
-        ) {
-
-            loadReferralStats();
-
-            updateUI();
-
-        }
-
-        else {
-
-            updateUI();
-
-        }
+        window.Telegram.WebApp.openLink(
+            url
+        );
 
     }
 
+    else {
 
-    /* =========================================
-       WITHDRAW
-    ========================================= */
+        window.open(
+            url,
+            '_blank'
+        );
 
-    function submitWithdrawal() {
+    }
 
-        if (isWithdrawSubmitting) {
-            return;
-        }
-
-
-        const btn =
-            document.getElementById(
-                'withdraw-btn'
-            );
+}
 
 
-        const binanceIdInput =
-            document.getElementById(
-                'binance-id'
-            );
+// =====================================================
+// SCREEN SWITCH
+// =====================================================
 
+function switchScreen(
+    screenId,
+    navId
+) {
 
-        const amountInput =
-            document.getElementById(
-                'withdraw-amount'
-            );
+    document
+        .querySelectorAll(
+            '.screen'
+        )
+        .forEach(
+            screen => {
 
+                screen.classList.remove(
+                    'active'
+                );
 
-        const binanceId =
-            binanceIdInput.value.trim();
-
-
-        const amount =
-            parseInt(
-                amountInput.value
-            );
-
-
-        if (!binanceId) {
-
-            alert(
-                "Please enter your Binance ID!"
-            );
-
-            return;
-
-        }
-
-
-        if (
-            isNaN(amount) ||
-            amount < 1000
-        ) {
-
-            alert(
-                "Minimum withdrawal is 1,000 BONK!"
-            );
-
-            return;
-
-        }
-
-
-        if (
-            balance <= 0 ||
-            amount > balance
-        ) {
-
-            alert(
-                "❌ Insufficient BONK balance!"
-            );
-
-            return;
-
-        }
-
-
-        isWithdrawSubmitting = true;
-
-
-        btn.disabled = true;
-
-
-        btn.innerText =
-            "Processing...";
-
-
-        balance -= amount;
-
-
-        localStorage.setItem(
-            'bonk_balance',
-            balance
+            }
         );
 
 
+    document
+        .querySelectorAll(
+            '.nav-item'
+        )
+        .forEach(
+            nav => {
+
+                nav.classList.remove(
+                    'active'
+                );
+
+            }
+        );
+
+
+    const screen =
+        document.getElementById(
+            screenId
+        );
+
+
+    if (screen) {
+
+        screen.classList.add(
+            'active'
+        );
+
+    }
+
+
+    const nav =
+        document.getElementById(
+            navId
+        );
+
+
+    if (nav) {
+
+        nav.classList.add(
+            'active'
+        );
+
+    }
+
+
+    if (
+        screenId ===
+        'admin-screen'
+    ) {
+
+        fetchWithdrawals();
+
+    }
+
+    else if (
+        screenId ===
+        'referral-screen'
+    ) {
+
+        loadReferralStats();
+
+        claimReferralReward();
+
         updateUI();
 
+    }
 
-        fetch(
-            `${BACKEND_URL}/api/bonk/withdraw`,
-            {
+    else {
 
-                method: 'POST',
+        updateUI();
 
-                headers: {
-                    'Content-Type':
-                        'application/json'
-                },
+    }
 
-                body: JSON.stringify({
+}
+
+
+// =====================================================
+// WITHDRAW
+// =====================================================
+
+function submitWithdrawal() {
+
+    if (
+        isWithdrawSubmitting
+    ) {
+
+        return;
+
+    }
+
+
+    const btn =
+        document.getElementById(
+            'withdraw-btn'
+        );
+
+
+    const binanceIdInput =
+        document.getElementById(
+            'binance-id'
+        );
+
+
+    const amountInput =
+        document.getElementById(
+            'withdraw-amount'
+        );
+
+
+    const binanceId =
+        binanceIdInput.value.trim();
+
+
+    const amount =
+        parseInt(
+            amountInput.value
+        );
+
+
+    if (!binanceId) {
+
+        alert(
+            "Please enter your Binance ID!"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        isNaN(amount) ||
+        amount < 1000
+    ) {
+
+        alert(
+            "Minimum withdrawal is 1,000 BONK!"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        balance <= 0 ||
+        amount > balance
+    ) {
+
+        alert(
+            "❌ Insufficient BONK balance!"
+        );
+
+        return;
+
+    }
+
+
+    isWithdrawSubmitting =
+        true;
+
+
+    btn.disabled = true;
+
+
+    btn.innerText =
+        "Processing...";
+
+
+    /*
+        Deduct locally first.
+    */
+
+    balance -= amount;
+
+
+    saveBalance();
+
+
+    updateUI();
+
+
+    fetch(
+        `${BACKEND_URL}/api/bonk/withdraw`,
+        {
+
+            method: 'POST',
+
+            headers: {
+                'Content-Type':
+                    'application/json'
+            },
+
+            body: JSON.stringify({
+
+                binanceId:
 
                     binanceId,
 
+                amount:
+
                     amount,
 
-                    tokenType: 'BONK',
+                userId:
 
-                    currentBalance:
-                        balance
+                    telegramUserId,
 
-                })
+                tokenType:
+
+                    'BONK',
+
+                currentBalance:
+
+                    balance
+
+            })
+
+        }
+    )
+    .then(
+        response => {
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "HTTP " +
+                    response.status
+                );
 
             }
-        )
-        .then(res =>
-            res.json()
-        )
-        .then(data => {
+
+            return response.json();
+
+        }
+    )
+    .then(
+        data => {
 
             if (!data.success) {
 
                 balance += amount;
 
 
-                localStorage.setItem(
-                    'bonk_balance',
-                    balance
-                );
+                saveBalance();
 
 
                 updateUI();
@@ -2415,11 +3358,15 @@
 
                 alert(
                     "❌ " +
-                    data.message
+                    (
+                        data.message ||
+                        "Withdrawal failed"
+                    )
                 );
 
 
                 return;
+
             }
 
 
@@ -2428,20 +3375,28 @@
             );
 
 
-            binanceIdInput.value = '';
+            binanceIdInput.value =
+                '';
 
-            amountInput.value = '';
 
-        })
-        .catch(err => {
+            amountInput.value =
+                '';
+
+        }
+    )
+    .catch(
+        error => {
+
+            console.error(
+                "Withdrawal error:",
+                error
+            );
+
 
             balance += amount;
 
 
-            localStorage.setItem(
-                'bonk_balance',
-                balance
-            );
+            saveBalance();
 
 
             updateUI();
@@ -2451,102 +3406,112 @@
                 "❌ Network Error. Please try again."
             );
 
-        })
-        .finally(() => {
+        }
+    )
+    .finally(
+        () => {
 
             isWithdrawSubmitting =
                 false;
 
 
-            btn.disabled = false;
+            btn.disabled =
+                false;
 
 
             btn.innerText =
                 "Withdraw Now";
 
-        });
+        }
+    );
 
-    }
-
-
-    /* =========================================
-       ADMIN WITHDRAWALS
-    ========================================= */
-
-    function fetchWithdrawals() {
-
-        const listElement =
-            document.getElementById(
-                'withdrawal-list'
-            );
+}
 
 
-        listElement.innerHTML = `
-            <tr>
-                <td
-                    colspan="4"
-                    style="text-align:center;"
-                >
-                    ⏳ Fetching BONK requests...
-                </td>
-            </tr>
-        `;
+// =====================================================
+// ADMIN WITHDRAWALS
+// =====================================================
+
+function fetchWithdrawals() {
+
+    const listElement =
+        document.getElementById(
+            'withdrawal-list'
+        );
 
 
-        const controller =
-            new AbortController();
+    listElement.innerHTML = `
+        <tr>
+            <td
+                colspan="4"
+                style="text-align:center;"
+            >
+                ⏳ Fetching BONK requests...
+            </td>
+        </tr>
+    `;
 
 
-        const timeoutId =
-            setTimeout(
-                () =>
-                    controller.abort(),
-                20000
-            );
+    const controller =
+        new AbortController();
 
 
-        fetch(
-            `${BACKEND_URL}/api/bonk/withdrawals`,
-            {
+    const timeoutId =
+        setTimeout(
+            () => {
 
-                method: 'GET',
+                controller.abort();
 
-                headers: {
+            },
+            20000
+        );
 
-                    'Accept':
-                        'application/json',
 
-                    'Content-Type':
-                        'application/json'
+    fetch(
+        `${BACKEND_URL}/api/bonk/withdrawals`,
+        {
 
-                },
+            method: 'GET',
 
-                signal:
-                    controller.signal
+            headers: {
 
-            }
-        )
-        .then(res => {
+                'Accept':
+                    'application/json',
+
+                'Content-Type':
+                    'application/json'
+
+            },
+
+            signal:
+                controller.signal
+
+        }
+    )
+    .then(
+        response => {
 
             clearTimeout(
                 timeoutId
             );
 
 
-            if (!res.ok) {
+            if (!response.ok) {
 
                 throw new Error(
                     "HTTP Status " +
-                    res.status
+                    response.status
                 );
 
             }
 
 
-            return res.json();
+            return response.json();
 
-        })
-        .then(data => {
+        }
+    )
+    .then(
+        data => {
 
             const bonkData =
                 Array.isArray(data)
@@ -2561,7 +3526,10 @@
                                 ).toUpperCase();
 
 
-                            return token === 'BONK';
+                            return (
+                                token ===
+                                'BONK'
+                            );
 
                         }
                     )
@@ -2569,7 +3537,6 @@
 
 
             if (
-                !bonkData ||
                 bonkData.length === 0
             ) {
 
@@ -2585,10 +3552,12 @@
                 `;
 
                 return;
+
             }
 
 
-            let rowsHtml = '';
+            let rowsHtml =
+                '';
 
 
             bonkData.forEach(
@@ -2606,6 +3575,7 @@
 
 
                     rowsHtml += `
+
                         <tr>
 
                             <td>
@@ -2624,14 +3594,14 @@
 
                                 <button
                                     class="btn-sm btn-approve"
-                                    onclick="updateStatus('${reqId}', 'Approved')"
+                                    onclick="updateStatus('${reqId}','Approved')"
                                 >
                                     ✓
                                 </button>
 
                                 <button
                                     class="btn-sm btn-reject"
-                                    onclick="updateStatus('${reqId}', 'Rejected')"
+                                    onclick="updateStatus('${reqId}','Rejected')"
                                 >
                                     ✗
                                 </button>
@@ -2639,6 +3609,7 @@
                             </td>
 
                         </tr>
+
                     `;
 
                 }
@@ -2648,17 +3619,20 @@
             listElement.innerHTML =
                 rowsHtml;
 
-        })
-        .catch(err => {
+        }
+    )
+    .catch(
+        error => {
 
             console.error(
                 "Fetch Error:",
-                err
+                error
             );
 
 
             listElement.innerHTML = `
                 <tr>
+
                     <td
                         colspan="4"
                         style="
@@ -2671,112 +3645,211 @@
 
                         <br>
 
-                        <small style="color:#aaa;">
+                        <small
+                            style="color:#aaa;"
+                        >
                             Render server is waking up.
                             Click "🔄 Refresh Requests"
                             in 10 seconds.
                         </small>
 
                     </td>
+
                 </tr>
             `;
 
-        });
+        }
+    );
 
-    }
-
-
-    function updateStatus(
-        id,
-        newStatus
-    ) {
-
-        fetch(
-            `${BACKEND_URL}/api/bonk/withdrawals/${id}`,
-            {
-
-                method: 'PUT',
-
-                headers: {
-                    'Content-Type':
-                        'application/json'
-                },
-
-                body: JSON.stringify({
-                    status: newStatus
-                })
-
-            }
-        )
-        .then(res =>
-            res.json()
-        )
-        .then(() => {
-
-            alert(
-                `Status updated to ${newStatus}`
-            );
+}
 
 
-            fetchWithdrawals();
+// =====================================================
+// ADMIN UPDATE STATUS
+// =====================================================
 
-        })
-        .catch(() =>
-            alert(
-                "Failed to update status"
-            )
-        );
+function updateStatus(
+    id,
+    newStatus
+) {
 
-    }
+    fetch(
+        `${BACKEND_URL}/api/bonk/withdrawals/${id}`,
+        {
 
+            method: 'PUT',
 
-    /* =========================================
-       PAGE LOAD
-    ========================================= */
+            headers: {
+                'Content-Type':
+                    'application/json'
+            },
 
-    window.addEventListener(
-        'DOMContentLoaded',
-        () => {
+            body: JSON.stringify({
 
-            initializeReferral();
+                status:
+                    newStatus
 
+            })
 
-            const urlParams =
-                new URLSearchParams(
-                    window.location.search
-                );
+        }
+    )
+    .then(
+        response =>
+            response.json()
+    )
+    .then(
+        data => {
 
+            if (
+                data &&
+                data.success
+            ) {
 
-            const isAdmin =
-                urlParams.get('admin') === 'true' ||
-                window.location.hash === '#admin';
-
-
-            if (isAdmin) {
-
-                document.getElementById(
-                    'nav-admin'
-                ).style.display =
-                    'block';
-
-
-                switchScreen(
-                    'admin-screen',
-                    'nav-admin'
+                alert(
+                    `Status updated to ${newStatus}`
                 );
 
             }
 
             else {
 
-                updateUI();
+                alert(
+                    "Failed to update status"
+                );
 
-                checkWelcomeModal();
+            }
+
+
+            fetchWithdrawals();
+
+        }
+    )
+    .catch(
+        error => {
+
+            console.error(
+                error
+            );
+
+
+            alert(
+                "Failed to update status"
+            );
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// PAGE LOAD
+// =====================================================
+
+window.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        /*
+            Initialize referral system.
+        */
+
+        initializeReferral();
+
+
+        /*
+            Check admin URL.
+        */
+
+        const urlParams =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        const isAdmin =
+            urlParams.get(
+                'admin'
+            ) === 'true' ||
+            window.location.hash ===
+                '#admin';
+
+
+        if (isAdmin) {
+
+            document.getElementById(
+                'nav-admin'
+            ).style.display =
+                'block';
+
+
+            switchScreen(
+                'admin-screen',
+                'nav-admin'
+            );
+
+        }
+
+        else {
+
+            updateUI();
+
+
+            checkWelcomeModal();
+
+        }
+
+    }
+);
+
+
+// =====================================================
+// EXTRA: CLAIM REFERRAL WHEN APP RETURNS
+// =====================================================
+
+window.addEventListener(
+    'focus',
+    () => {
+
+        if (
+            telegramUser &&
+            telegramUser.id
+        ) {
+
+            claimReferralReward();
+
+            loadReferralStats();
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    'visibilitychange',
+    () => {
+
+        if (
+            document.visibilityState ===
+            'visible'
+        ) {
+
+            if (
+                telegramUser &&
+                telegramUser.id
+            ) {
+
+                claimReferralReward();
+
+                loadReferralStats();
 
             }
 
         }
-    );
+
+    }
+);
 
 </script>
 
