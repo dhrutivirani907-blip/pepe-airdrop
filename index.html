@@ -727,6 +727,26 @@ input:focus {
     cursor: pointer;
 }
 
+
+/* =====================================================
+   MINING
+   ===================================================== */
+.mining-balance-card {
+    width:100%; max-width:360px; background:var(--card-bg);
+    border:1px solid var(--border-color); border-radius:16px;
+    padding:18px; text-align:center; margin-bottom:16px;
+}
+.mining-balance-value { font-size:30px; font-weight:800; color:var(--gold); margin-top:6px; }
+.mining-coin-wrap { position:relative; width:230px; height:230px; display:flex; align-items:center; justify-content:center; margin:14px 0 18px; }
+.mining-ring { position:absolute; inset:0; border-radius:50%; border:6px solid transparent; border-top-color:#ffd43b; border-right-color:#f3ba2f; box-shadow:0 0 20px rgba(243,186,47,.8); animation:spinMiningRing 1.6s linear infinite; display:none; }
+.mining-ring.active { display:block; }
+@keyframes spinMiningRing { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+.mining-coin-img { width:170px; height:170px; border-radius:50%; object-fit:cover; z-index:1; }
+.mining-counter { width:100%; max-width:320px; background:#111418; border:1px solid var(--border-color); border-radius:12px; padding:15px; text-align:center; margin:12px 0; }
+.mining-counter strong { display:block; color:var(--gold); font-size:25px; margin-top:5px; }
+.mining-notice { width:100%; max-width:340px; text-align:center; color:var(--text-muted); font-size:13px; line-height:1.5; margin-top:12px; }
+.mining-rate { color:var(--gold); font-weight:800; margin-top:8px; }
+
 </style>
 
 </head>
@@ -830,187 +850,55 @@ input:focus {
      TASKS
      ===================================================== -->
 
-<div
-    id="tasks-screen"
-    class="screen"
->
-
-    <div
-        class="balance-header"
-        style="margin-bottom:20px;"
-    >
-
-        <div class="balance-title">
-            EARN EXTRA BONK
-        </div>
-
-        <div
-            class="balance-amount"
-            style="font-size:28px;"
-        >
-            Complete Tasks
-        </div>
-
+<div id="tasks-screen" class="screen">
+    <div class="balance-header" style="margin-bottom:20px;">
+        <div class="balance-title">EARN EXTRA BONK</div>
+        <div class="balance-amount" style="font-size:28px;">Complete Task</div>
     </div>
-
 
     <div class="task-list">
-
-
         <div class="task-card">
-
             <div class="task-info">
-
-                <h4>
-                    Join MetaCcx Bot
-                </h4>
-
-                <p>
-                    +200 BONK
-                </p>
-
+                <h4>dogerefeer</h4>
+                <p>+200 BONK</p>
             </div>
-
-            <button
-                id="task-btn-video"
-                class="btn-sm btn-start"
-                onclick="handleTaskAction('video',200,TASK_1_LINK)"
-            >
-                Join
-            </button>
-
+            <button id="task-btn-dogerefeer" class="btn-sm btn-start" onclick="handleTaskAction('dogerefeer',200,TASK_1_LINK)">Join</button>
         </div>
-
-
-        <div class="task-card">
-
-            <div class="task-info">
-
-                <h4>
-                    Join SHIBA Inu Bot
-                </h4>
-
-                <p>
-                    +200 BONK
-                </p>
-
-            </div>
-
-            <button
-                id="task-btn-partner"
-                class="btn-sm btn-start"
-                onclick="handleTaskAction('partner',200,TASK_2_LINK)"
-            >
-                Join
-            </button>
-
-        </div>
-
-
-        <div class="task-card">
-
-            <div class="task-info">
-
-                <h4>
-                    Join CryptoPro Up Bot
-                </h4>
-
-                <p>
-                    +200 BONK
-                </p>
-
-            </div>
-
-            <button
-                id="task-btn-cryptopro"
-                class="btn-sm btn-start"
-                onclick="handleTaskAction('cryptopro',200,TASK_3_LINK)"
-            >
-                Join
-            </button>
-
-        </div>
-
-
-        <div class="task-card">
-
-            <div class="task-info">
-
-                <h4>
-                    Crypto Income
-                </h4>
-
-                <p>
-                    +200 BONK
-                </p>
-
-            </div>
-
-            <button
-                id="task-btn-cryptoincome"
-                class="btn-sm btn-start"
-                onclick="handleTaskAction('cryptoincome',200,TASK_4_LINK)"
-            >
-                Join
-            </button>
-
-        </div>
-
-
-        <div class="task-card">
-
-            <div class="task-info">
-
-                <h4>
-                    Wolf Rush
-                </h4>
-
-                <p>
-                    +200 BONK
-                </p>
-
-            </div>
-
-            <button
-                id="task-btn-wolfrush"
-                class="btn-sm btn-start"
-                onclick="handleTaskAction('wolfrush',200,TASK_5_LINK)"
-            >
-                Join
-            </button>
-
-        </div>
-
-
-        <div class="task-card">
-
-            <div class="task-info">
-
-                <h4>
-                    INSIGHT WITH CRYPTO
-                </h4>
-
-                <p>
-                    +200 BONK
-                </p>
-
-            </div>
-
-            <button
-                id="task-btn-cryptoinsight"
-                class="btn-sm btn-start"
-                onclick="handleTaskAction('cryptoinsight',200,TASK_6_LINK)"
-            >
-                Join
-            </button>
-
-        </div>
-
-
     </div>
-
 </div>
 
+
+<!-- =====================================================
+     MINING
+     ===================================================== -->
+<div id="mining-screen" class="screen">
+    <div class="mining-balance-card">
+        <div class="balance-title">TOTAL BALANCE</div>
+        <div class="mining-balance-value"><span id="mining-balance-val">0</span> BONK</div>
+    </div>
+
+    <div class="balance-header">
+        <div class="balance-title">BONK MINING</div>
+        <div class="balance-amount" style="font-size:25px;">Watch & Mine</div>
+    </div>
+
+    <div class="mining-coin-wrap">
+        <div id="mining-ring" class="mining-ring"></div>
+        <img src="assets/bonk.png" alt="BONK" class="mining-coin-img" onerror="this.src='https://cryptologos.cc/logos/bonk1-bonk-logo.png'">
+    </div>
+
+    <button id="mining-ad-btn" class="btn" onclick="openMiningAdModal()">🎬 Watch Ads (20)</button>
+
+    <div class="mining-counter">
+        <div class="balance-title">TOTAL ACTIVE MINERS</div>
+        <strong id="active-miners-val">0</strong>
+        <div class="mining-rate" id="mining-rate-text">0 BONK / second</div>
+    </div>
+
+    <div class="mining-notice">
+        Watch 20 ads and active 1 bonk miner for 3 minutes 3 bonk mining evry 1 second you can get unlimited miner buy watching the ads.
+    </div>
+</div>
 
 
 <!-- =====================================================
@@ -1356,6 +1244,18 @@ input:focus {
 
 
 <!-- =====================================================
+     MINING AD MODAL
+     ===================================================== -->
+<div class="modal" id="miningAdModal">
+    <div class="modal-content">
+        <div class="modal-title">🎬 Watch Ad</div>
+        <div class="modal-desc">Watch ad minimum <b>8 seconds</b> to count 1 ad.</div>
+        <button class="modal-btn" onclick="startMiningAd()">WATCH ADS</button>
+    </div>
+</div>
+
+
+<!-- =====================================================
      WELCOME MODAL
      ===================================================== -->
 
@@ -1423,6 +1323,15 @@ input:focus {
 
     <div
         class="nav-item"
+        id="nav-mining"
+        onclick="switchScreen('mining-screen','nav-mining')"
+    >
+        MINING
+    </div>
+
+
+    <div
+        class="nav-item"
         id="nav-tasks"
         onclick="switchScreen('tasks-screen','nav-tasks')"
     >
@@ -1469,23 +1378,7 @@ input:focus {
 // =====================================================
 
 const TASK_1_LINK =
-    "https://t.me/MetaCcx_bot?start=1912015558";
-
-const TASK_2_LINK =
-    "https://t.me/SHIBAInuTapbot?start=1912015558";
-
-const TASK_3_LINK =
-    "https://t.me/CryptoProUpRobot?start=Bot51728662";
-
-const TASK_4_LINK =
-    "https://t.me/+gZEl6wYrSPY3YzRl";
-
-const TASK_5_LINK =
-    "https://t.me/WolfRush_bot/wolf_rush_earn?startapp=8505916897";
-
-const TASK_6_LINK =
-    "https://t.me/Crypto_Insight_BD49";
-
+    "https://t.me/cosmicprouprobot/app?startapp=ref_1912015558";
 
 const WELCOME_TASK_LINK =
     "https://t.me/earn_doge_bywatchingads_bot?start=1912015558";
@@ -2462,6 +2355,7 @@ function updateUI() {
 
 
     updateTaskButtons();
+    updateMiningUI();
 
 }
 
@@ -2469,7 +2363,6 @@ function updateUI() {
 // =====================================================
 // TAP
 // =====================================================
-
 function handleTap() {
 
     if (xp >= 10) {
@@ -3741,6 +3634,82 @@ function updateStatus(
 
 }
 
+
+
+// =====================================================
+// BONK MINING
+// =====================================================
+const MINING_AD_LINK = "https://www.profitableratecpmnetwork.com/mag701y1?key=e6dcf81d34580abdf64766ac0be7e76d";
+const MINING_AD_COUNT_KEY = `bonk_mining_ad_count_${telegramUserId}`;
+const MINING_MINERS_KEY = `bonk_active_miners_${telegramUserId}`;
+const MINING_MINER_EXPIRIES_KEY = `bonk_miner_expiries_${telegramUserId}`;
+let miningAdStartTime = 0;
+let miningAdTracking = false;
+let miningTick = null;
+
+let miningAdCount = parseInt(localStorage.getItem(MINING_AD_COUNT_KEY));
+if (isNaN(miningAdCount) || miningAdCount < 0 || miningAdCount > 19) miningAdCount = 0;
+let miningExpiries = JSON.parse(localStorage.getItem(MINING_MINER_EXPIRIES_KEY) || '[]').filter(t => t > Date.now());
+
+function saveMiningState() {
+    localStorage.setItem(MINING_AD_COUNT_KEY, String(miningAdCount));
+    localStorage.setItem(MINING_MINER_EXPIRIES_KEY, JSON.stringify(miningExpiries));
+}
+function activeMiningMiners() {
+    miningExpiries = miningExpiries.filter(t => t > Date.now());
+    saveMiningState();
+    return miningExpiries.length;
+}
+function updateMiningUI() {
+    const miners = activeMiningMiners();
+    const adBtn = document.getElementById('mining-ad-btn');
+    if (adBtn) adBtn.innerText = `🎬 Watch Ads (${miningAdCount}/20)`;
+    const minerEl = document.getElementById('active-miners-val');
+    if (minerEl) minerEl.innerText = miners;
+    const rateEl = document.getElementById('mining-rate-text');
+    if (rateEl) rateEl.innerText = `${miners * 3} BONK / second`;
+    const ring = document.getElementById('mining-ring');
+    if (ring) ring.classList.toggle('active', miners > 0);
+    const bal = document.getElementById('mining-balance-val');
+    if (bal) bal.innerText = balance;
+}
+function openMiningAdModal() {
+    if (miningAdCount >= 20) miningAdCount = 0;
+    document.getElementById('miningAdModal').style.display = 'flex';
+}
+function startMiningAd() {
+    document.getElementById('miningAdModal').style.display = 'none';
+    miningAdStartTime = Date.now();
+    miningAdTracking = true;
+    openExternalLink(MINING_AD_LINK);
+}
+function verifyMiningAd() {
+    if (!miningAdTracking) return;
+    const seconds = (Date.now() - miningAdStartTime) / 1000;
+    miningAdTracking = false;
+    if (seconds < 8) {
+        alert('⚠️ Watch the ad for at least 8 seconds. Ad not counted.');
+        return;
+    }
+    miningAdCount++;
+    if (miningAdCount >= 20) {
+        miningAdCount = 0;
+        miningExpiries.push(Date.now() + 180000);
+        alert('⛏️ 1 BONK miner activated for 3 minutes!');
+    } else {
+        alert(`✅ Ad counted: ${miningAdCount}/20`);
+    }
+    saveMiningState();
+    updateMiningUI();
+}
+window.addEventListener('focus', () => { if (miningAdTracking) verifyMiningAd(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && miningAdTracking) verifyMiningAd(); });
+if (miningTick) clearInterval(miningTick);
+miningTick = setInterval(() => {
+    const miners = activeMiningMiners();
+    if (miners > 0) { balance += miners * 3; saveBalance(); updateUI(); }
+    updateMiningUI();
+}, 1000);
 
 // =====================================================
 // PAGE LOAD
