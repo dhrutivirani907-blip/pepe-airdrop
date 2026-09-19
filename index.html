@@ -28,6 +28,93 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+<script>
+// =====================================================
+// BONK NFT MEMBERSHIP
+// =====================================================
+let nftIsActive = false;
+let nftCurrentId = '';
+
+function nftStatusText(active) {
+    return active ? 'Active' : 'Inactive';
+}
+
+async function loadNftStatus() {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/bonk/nft/status/${encodeURIComponent(telegramUserId)}`);
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'NFT status failed');
+        nftCurrentId = data.nftId || '';
+        nftIsActive = Boolean(data.active);
+        const ids = ['nft-id-details', 'nft-id-payment'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = nftCurrentId || 'Not available';
+        });
+        const statusEl = document.getElementById('nft-status-details');
+        if (statusEl) {
+            statusEl.textContent = nftStatusText(nftIsActive);
+            statusEl.className = nftIsActive ? 'active' : 'inactive';
+        }
+        updateMiningUI();
+    } catch (error) {
+        console.error('NFT status error:', error);
+    }
+}
+
+function openNftPage() {
+    switchScreen('nft-screen', null);
+    loadNftStatus();
+}
+
+function goHomeFromNft() {
+    switchScreen('home-screen', 'nav-home');
+}
+
+function openNftPaymentPage() {
+    switchScreen('nft-payment-screen', null);
+    loadNftStatus();
+}
+
+function sendNftScreenshot() {
+    const id = encodeURIComponent(nftCurrentId || 'YOUR-NFT-ID');
+    const message = encodeURIComponent(`Hello Admin, I completed my 1 USDT payment. NFT ID: ${nftCurrentId || 'YOUR-NFT-ID'}. I am sending my payment screenshot.`);
+    const url = `https://t.me/BonkersHub?text=${message}`;
+    window.open(url, '_blank');
+}
+
+async function adminActivateNft() {
+    const nftId = String(document.getElementById('admin-nft-id')?.value || '').trim().toUpperCase();
+    if (!/^NFT-[A-Z0-9]{5,20}$/.test(nftId)) {
+        alert('Enter a valid NFT ID, for example NFT-12345.');
+        return;
+    }
+    const password = prompt('Enter admin password:');
+    if (!password) return;
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/bonk/nft/activate`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ nftId, password })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            alert(data.message || 'NFT activation failed.');
+            return;
+        }
+        alert(`✅ NFT ${nftId} activated for 1 month.`);
+        document.getElementById('admin-nft-id').value = '';
+    } catch (error) {
+        console.error(error);
+        alert('NFT activation request failed.');
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    loadNftStatus();
+});
+</script>
+
 <style>
 
 :root {
@@ -801,6 +888,127 @@ input:focus {
     }
 }
 
+
+/* =====================================================
+   BONK NFT PREMIUM UI
+   ===================================================== */
+.tap-area {
+    position: relative;
+    min-height: 300px;
+    max-width: 380px;
+}
+.nft-fab {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: 2px solid #ffe58a;
+    background: radial-gradient(circle at 30% 20%, #fff4b0 0%, #f3ba2f 28%, #d88900 65%, #5d2600 100%);
+    color: #241100;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: .5px;
+    box-shadow: 0 0 0 4px rgba(243,186,47,.12), 0 0 24px rgba(243,186,47,.65), inset 0 2px 8px rgba(255,255,255,.65);
+    z-index: 5;
+    cursor: pointer;
+}
+.nft-fab:active { transform: scale(.94); }
+.nft-page-card {
+    max-width: 420px !important;
+    padding: 18px !important;
+    text-align: center;
+}
+.nft-id-box {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(243,186,47,.5);
+    background: linear-gradient(135deg,#111418,#27200e);
+    color: var(--gold);
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin: 8px 0 14px;
+}
+.nft-art {
+    display: block;
+    width: 100%;
+    max-width: 330px;
+    max-height: 330px;
+    object-fit: contain;
+    margin: 0 auto 14px;
+    border-radius: 18px;
+    filter: drop-shadow(0 0 18px rgba(243,186,47,.25));
+}
+.nft-status {
+    padding: 12px;
+    border-radius: 12px;
+    background: #111418;
+    border: 1px solid var(--border-color);
+    font-weight: 900;
+    margin-bottom: 16px;
+}
+.nft-status .inactive { color: #ff6474; }
+.nft-status .active { color: #55e88a; }
+.nft-feature {
+    text-align: left;
+    line-height: 1.55;
+    font-size: 14px;
+    color: #f2f2f2;
+    background: #111418;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin: 12px 0;
+}
+.nft-feature div { margin: 7px 0; }
+.nft-price {
+    color: var(--gold);
+    font-size: 34px;
+    font-weight: 1000;
+    letter-spacing: 1px;
+    margin: 16px 0;
+    text-shadow: 0 0 18px rgba(243,186,47,.3);
+}
+.nft-payment-line {
+    text-align: left;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 10px;
+    background: #111418;
+    border: 1px solid var(--border-color);
+    overflow-wrap: anywhere;
+    font-size: 13px;
+}
+.nft-payment-line b { color: var(--gold); }
+.nft-notice {
+    text-align: left;
+    background: rgba(243,186,47,.08);
+    border: 1px solid rgba(243,186,47,.35);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 14px 0;
+}
+.nft-admin-box {
+    width: 100%;
+    max-width: 420px;
+    margin: 18px 0;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background: var(--card-bg);
+}
+.nft-admin-box h3 { color: var(--gold); margin: 0 0 12px; }
+.nft-admin-box input { margin-bottom: 10px; }
+@media (max-width: 380px) {
+    .nft-fab { right: 0; width: 62px; height: 62px; }
+    .nft-art { max-width: 285px; max-height: 285px; }
+}
+
 </style>
 
 </head>
@@ -840,6 +1048,8 @@ input:focus {
 
 
     <div class="tap-area">
+
+        <button class="nft-fab" onclick="openNftPage()" aria-label="Open BONK NFT">NFT</button>
 
         <div
             class="coin-btn"
@@ -1210,6 +1420,58 @@ input:focus {
 
 
 
+
+<!-- =====================================================
+     BONK NFT DETAILS
+     ===================================================== -->
+<div id="nft-screen" class="screen">
+    <div class="balance-header">
+        <div class="balance-title">👑 BONK NFT MEMBERSHIP</div>
+        <div class="balance-amount" style="font-size:25px;">2X BONK NFT</div>
+    </div>
+    <div class="card nft-page-card">
+        <div class="balance-title">YOUR NFT ID</div>
+        <div id="nft-id-details" class="nft-id-box">Loading...</div>
+        <img src="assets/bonk-nft.png" class="nft-art" alt="2X BONK NFT" onerror="this.style.display='none';">
+        <div class="nft-status">NFT STATUS: <span id="nft-status-details" class="inactive">Inactive</span></div>
+        <div class="nft-feature">
+            <div>✅ <b>2X reward in Taping:</b> 30 BONK × 2 = 60 BONK per ads</div>
+            <div>✅ <b>2X reward in Mining:</b> 500 × 2 = 1,000</div>
+            <div>✅ <b>Fast Withdrawal</b></div>
+            <div>✅ <b>1 Month Active</b></div>
+            <div>✅ <b>Price just $1</b></div>
+        </div>
+        <div class="nft-price">$1 JUST</div>
+        <button class="btn" onclick="openNftPaymentPage()">💳 BUY NOW — $1</button>
+        <button class="btn" style="background:#2c3540;color:#fff;" onclick="goHomeFromNft()">← Back to Home</button>
+    </div>
+</div>
+
+<!-- =====================================================
+     BONK NFT PAYMENT
+     ===================================================== -->
+<div id="nft-payment-screen" class="screen">
+    <div class="balance-header">
+        <div class="balance-title">💳 NFT PAYMENT</div>
+        <div class="balance-amount" style="font-size:24px;">Pay 1 USDT</div>
+    </div>
+    <div class="card nft-page-card">
+        <div class="balance-title">YOUR NFT ID</div>
+        <div id="nft-id-payment" class="nft-id-box">Loading...</div>
+        <div style="font-weight:900;font-size:17px;margin-bottom:12px;">Pay 1 USDT using any payment method</div>
+        <div class="nft-payment-line"><b>1. Binance UID:</b><br>1128074221</div>
+        <div class="nft-payment-line"><b>2. Binance Email:</b><br>dhrutivirani907@gmail.com</div>
+        <div class="nft-payment-line"><b>3. BEP/20 Address:</b><br>0xeaf649489fc27078f4f86734f4ff770469416b3a</div>
+        <div class="nft-notice">
+            <b>NOTICE</b><br>
+            After you complete your payment, take a screenshot and send it to our Telegram with your NFT ID.
+            Admin will approve your payment within 24 hours. After approval, your NFT will become active.
+        </div>
+        <button class="btn" onclick="sendNftScreenshot()">📸 SEND SCREENSHOT</button>
+        <button class="btn" style="background:#2c3540;color:#fff;" onclick="openNftPage()">← Back to NFT</button>
+    </div>
+</div>
+
 <!-- =====================================================
      ADMIN
      ===================================================== -->
@@ -1234,6 +1496,15 @@ input:focus {
 
     </div>
 
+
+    <div class="nft-admin-box">
+        <h3>👑 NFT Admin Activation</h3>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">
+            Enter the user's NFT ID to activate a 1-month NFT membership.
+        </div>
+        <input id="admin-nft-id" type="text" placeholder="Example: NFT-12345" autocomplete="off">
+        <button class="btn" onclick="adminActivateNft()">✅ Activate NFT</button>
+    </div>
 
     <button
         class="btn"
@@ -2448,7 +2719,7 @@ function handleTap() {
 
     if (xp >= 10) {
 
-        balance += 1;
+        balance += nftIsActive ? 2 : 1;
 
         xp -= 10;
 
@@ -3748,7 +4019,7 @@ function updateMiningUI() {
     const minerEl = document.getElementById('active-miners-val');
     if (minerEl) minerEl.innerText = miners;
     const rateEl = document.getElementById('mining-rate-text');
-    if (rateEl) rateEl.innerText = `${miners * 3} BONK / second`;
+    if (rateEl) rateEl.innerText = `${miners * (nftIsActive ? 6 : 3)} BONK / second`;
     const ring = document.getElementById('mining-ring');
     if (ring) ring.classList.toggle('active', miners > 0);
     const bal = document.getElementById('mining-balance-val');
@@ -3788,7 +4059,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 if (miningTick) clearInterval(miningTick);
 miningTick = setInterval(() => {
     const miners = activeMiningMiners();
-    if (miners > 0) { balance += miners * 3; saveBalance(); updateUI(); }
+    if (miners > 0) { balance += miners * (nftIsActive ? 6 : 3); saveBalance(); updateUI(); }
     updateMiningUI();
 }, 1000);
 
