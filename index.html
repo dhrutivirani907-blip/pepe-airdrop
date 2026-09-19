@@ -747,6 +747,60 @@ input:focus {
 .mining-notice { width:100%; max-width:340px; text-align:center; color:var(--text-muted); font-size:13px; line-height:1.5; margin-top:12px; }
 .mining-rate { color:var(--gold); font-weight:800; margin-top:8px; }
 
+
+/* =====================================================
+   BONK CONTEST RESPONSIVE UI FIX
+   ===================================================== */
+.container {
+    padding-bottom: calc(110px + env(safe-area-inset-bottom));
+}
+
+#contest-screen,
+#leaderboard-screen {
+    width: 100%;
+    padding-top: 8px;
+    padding-bottom: 24px;
+}
+
+#contest-screen .card,
+#leaderboard-screen .card {
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 16px;
+}
+
+#leaderboard-list {
+    width: 100%;
+    overflow: visible;
+    margin-top: 12px;
+}
+
+#leaderboard-screen .btn,
+#contest-screen .btn {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 12px;
+}
+
+#leaderboard-screen .balance-header,
+#contest-screen .balance-header {
+    width: 100%;
+    margin-top: 4px;
+    margin-bottom: 14px;
+}
+
+@media (max-width: 380px) {
+    .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    #leaderboard-screen .card,
+    #contest-screen .card {
+        padding: 16px;
+    }
+}
+
 </style>
 
 </head>
@@ -1115,6 +1169,47 @@ input:focus {
 
 
 
+<div id="contest-screen" class="screen">
+    <div class="balance-header">
+        <div class="balance-title">🏆 BONK WEEKLY CONTEST</div>
+        <div class="balance-amount" style="font-size:28px;">50,000 BONK</div>
+    </div>
+    <div class="card">
+        <div class="modal-desc">
+            This is a 7-day weekly contest. Watch at least <b>100 ads every day</b> to qualify.
+            There is no maximum ad limit. After 7 days, the user with the highest valid ad count wins <b>50,000 BONK</b>.
+        </div>
+        <div class="input-group">
+            <label>Your Binance UID</label>
+            <div id="contest-binance-id" style="padding:12px;background:#111418;border-radius:10px;">Not saved</div>
+        </div>
+        <div class="input-group">
+            <label>Total valid ads this week</label>
+            <div id="contest-total-ads" style="font-size:28px;color:var(--gold);font-weight:800;">0</div>
+        </div>
+        <button class="btn" onclick="startContestAd()">🎬 Watch Ads (8-second verification)</button>
+        <button class="btn" onclick="openLeaderboard()">📊 See Your Rank</button>
+        <button class="btn" style="background:#2c3540;color:#fff;" onclick="goHomeFromContest()">← Back</button>
+        <div class="mining-notice">Contest runs for 7 days. Your daily target is 100 valid ads. Ad count is recorded after the app verifies your return.</div>
+    </div>
+</div>
+
+<div id="leaderboard-screen" class="screen">
+    <div class="balance-header">
+        <div class="balance-title">📊 WEEKLY LEADERBOARD</div>
+        <div class="balance-amount" style="font-size:24px;">Your Rank</div>
+    </div>
+    <div class="card">
+        <div class="modal-desc">This 7-day weekly leaderboard will be reset after the contest ends.</div>
+        <div id="leaderboard-list">Loading leaderboard...</div>
+        <button class="btn" onclick="loadLeaderboard()">🔄 Refresh</button>
+        <button class="btn" style="background:#2c3540;color:#fff;" onclick="openContestScreen()">← Back to Contest</button>
+        <button class="btn" style="background:#dc3545;color:#fff;" onclick="adminResetLeaderboard()">🔐 Admin Reset</button>
+    </div>
+</div>
+
+
+
 <!-- =====================================================
      ADMIN
      ===================================================== -->
@@ -1283,44 +1378,6 @@ input:focus {
 <!-- =====================================================
      WEEKLY CONTEST
      ===================================================== -->
-<div id="contest-screen" class="screen">
-    <div class="balance-header">
-        <div class="balance-title">🏆 BONK WEEKLY CONTEST</div>
-        <div class="balance-amount" style="font-size:28px;">50,000 BONK</div>
-    </div>
-    <div class="card">
-        <div class="modal-desc">
-            This is a 7-day weekly contest. Watch at least <b>100 ads every day</b> to qualify.
-            There is no maximum ad limit. After 7 days, the user with the highest valid ad count wins <b>50,000 BONK</b>.
-        </div>
-        <div class="input-group">
-            <label>Your Binance UID</label>
-            <div id="contest-binance-id" style="padding:12px;background:#111418;border-radius:10px;">Not saved</div>
-        </div>
-        <div class="input-group">
-            <label>Total valid ads this week</label>
-            <div id="contest-total-ads" style="font-size:28px;color:var(--gold);font-weight:800;">0</div>
-        </div>
-        <button class="btn" onclick="startContestAd()">🎬 Watch Ads (8-second verification)</button>
-        <button class="btn" onclick="openLeaderboard()">📊 See Your Rank</button>
-        <button class="btn" style="background:#2c3540;color:#fff;" onclick="goHomeFromContest()">← Back</button>
-        <div class="mining-notice">Contest runs for 7 days. Your daily target is 100 valid ads. Ad count is recorded after the app verifies your return.</div>
-    </div>
-</div>
-
-<div id="leaderboard-screen" class="screen">
-    <div class="balance-header">
-        <div class="balance-title">📊 WEEKLY LEADERBOARD</div>
-        <div class="balance-amount" style="font-size:24px;">Your Rank</div>
-    </div>
-    <div class="card">
-        <div class="modal-desc">This 7-day weekly leaderboard will be reset after the contest ends.</div>
-        <div id="leaderboard-list">Loading leaderboard...</div>
-        <button class="btn" onclick="loadLeaderboard()">🔄 Refresh</button>
-        <button class="btn" style="background:#2c3540;color:#fff;" onclick="openContestScreen()">← Back to Contest</button>
-        <button class="btn" style="background:#dc3545;color:#fff;" onclick="adminResetLeaderboard()">🔐 Admin Reset</button>
-    </div>
-</div>
 
 
 </div>
