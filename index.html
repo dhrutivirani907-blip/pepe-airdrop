@@ -198,66 +198,6 @@ body {
     gap: 10px;
 }
 
-.tap-area {
-    flex: 1;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-
-    margin: 20px 0;
-}
-
-.coin-btn {
-    width: 220px;
-    height: 220px;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            #2b2b2b 0%,
-            #111111 100%
-        );
-
-    border: 4px solid var(--gold);
-
-    box-shadow:
-        0 0 30px rgba(
-            243,
-            186,
-            47,
-            0.3
-        );
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-
-    transition:
-        transform 0.05s ease;
-}
-
-.coin-btn:active {
-    transform: scale(0.95);
-}
-
-.coin-img {
-    width: 160px;
-    height: 160px;
-
-    border-radius: 50%;
-
-    object-fit: cover;
-
-    pointer-events: none;
-}
 
 .energy-box {
     width: 100%;
@@ -894,11 +834,6 @@ input:focus {
 /* =====================================================
    BONK NFT PREMIUM UI
    ===================================================== */
-.tap-area {
-    position: relative;
-    min-height: 300px;
-    max-width: 380px;
-}
 .nft-fab {
     position: absolute;
     top: 4px;
@@ -1141,91 +1076,134 @@ nav a.active,.bottom-nav .active,.navbar .active,.tab-bar .active,.navigation .a
   background:rgba(255,212,59,.10)!important;
   box-shadow:inset 0 0 0 1px rgba(255,212,59,.14)!important;
 }
-.coin-btn,#coin-btn{
-  appearance:none!important;
-  -webkit-appearance:none!important;
-  position:relative!important;
-  isolation:isolate;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  margin:20px auto!important;
-  width:min(72vw,290px)!important;
-  aspect-ratio:1!important;
-  height:auto!important;
-  border-radius:50%!important;
-  border:10px solid rgba(255,225,96,.18)!important;
-  background:
-    radial-gradient(circle at 32% 22%,#fff3a1 0%,#ffd83f 22%,#f7ad19 58%,#b96a0b 100%)!important;
-  box-shadow:
-    0 0 0 7px rgba(255,212,59,.08),
-    0 0 0 16px rgba(255,212,59,.035),
-    0 22px 45px rgba(0,0,0,.45),
-    inset 0 7px 0 rgba(255,255,255,.34),
-    inset 0 -12px 0 rgba(112,55,0,.25)!important;
-  transform:translateZ(0);
+/* =========================================================
+   BONK BALANCE BOX + 50 BONK AD REWARD UI
+   ========================================================= */
+.bonk-balance-box{
+    position:relative;
+    width:min(88vw,360px);
+    min-height:170px;
+    margin:18px auto 22px;
+    padding:20px 20px 18px;
+    border-radius:6px;
+    border:1px solid rgba(255,212,59,.28);
+    background:
+        linear-gradient(145deg,rgba(48,42,20,.96),rgba(18,22,34,.98) 52%,rgba(9,12,20,.98));
+    box-shadow:
+        0 28px 60px rgba(0,0,0,.48),
+        inset 0 1px 0 rgba(255,255,255,.12),
+        inset 0 -10px 24px rgba(0,0,0,.22),
+        0 0 32px rgba(255,212,59,.08);
+    overflow:hidden;
+    transform:translateZ(0);
 }
-.coin-btn:before,#coin-btn:before{
-  content:"";position:absolute;inset:10%;border:2px dashed rgba(93,51,0,.25);
-  border-radius:50%;pointer-events:none;
+.bonk-balance-box:before{
+    content:"";
+    position:absolute;
+    width:180px;height:180px;
+    top:-90px;right:-70px;
+    border-radius:50%;
+    background:rgba(255,212,59,.13);
+    filter:blur(10px);
 }
-.coin-btn:after,#coin-btn:after{
-  content:"TAP";position:absolute;bottom:9%;left:50%;transform:translateX(-50%);
-  padding:5px 13px;border-radius:999px;background:rgba(63,35,0,.28);
-  color:#fff3b0;font-size:10px;letter-spacing:.2em;font-weight:900;
+.bonk-balance-box:after{
+    content:"";
+    position:absolute;
+    left:10%;right:10%;bottom:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,212,59,.7),transparent);
 }
-.coin-btn img,#coin-btn img{
-  width:72%!important;height:72%!important;object-fit:contain!important;
-  filter:drop-shadow(0 12px 12px rgba(89,44,0,.3));
+.bonk-balance-box-title{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    font-size:15px;
+    font-weight:900;
+    letter-spacing:.02em;
+    color:#ffe58a;
+    margin-bottom:20px;
 }
-.coin-btn:active,#coin-btn:active{
-  transform:scale(.95)!important;
-  box-shadow:0 0 0 7px rgba(255,212,59,.08),0 10px 20px rgba(0,0,0,.38),inset 0 5px 0 rgba(255,255,255,.25)!important;
+.bonk-balance-box-body{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
 }
-.progress,.progress-bar,.xp-bar,.energy-bar{
-  height:11px!important;border-radius:999px!important;overflow:hidden!important;
-  background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.05)!important;
+.bonk-balance-coin{
+    width:86px;height:86px;
+    object-fit:contain;
+    border-radius:50%;
+    filter:drop-shadow(0 14px 18px rgba(0,0,0,.5));
 }
-.progress-bar,.xp-fill,.energy-fill{
-  background:linear-gradient(90deg,#ff9f1c,#ffd43b,#fff09a)!important;
-  border-radius:999px!important;
-  box-shadow:0 0 18px rgba(255,212,59,.28)!important;
+.bonk-balance-number{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    line-height:1;
 }
-.stat,.metric,.balance,.amount{
-  font-variant-numeric:tabular-nums;
-  font-weight:850!important;
+.bonk-balance-number #home-bonk-balance{
+    font-size:35px;
+    font-weight:950;
+    color:#fff;
+    font-variant-numeric:tabular-nums;
+    text-shadow:0 4px 18px rgba(0,0,0,.45);
 }
-.icon-box,.feature-icon,.menu-icon{
-  border-radius:16px!important;
-  background:linear-gradient(145deg,rgba(255,212,59,.18),rgba(255,255,255,.04))!important;
-  border:1px solid rgba(255,212,59,.15)!important;
+.bonk-balance-unit{
+    margin-top:8px;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:.12em;
+    color:#ffd43b;
 }
-.modal,.popup,.dialog,.overlay-content{
-  background:linear-gradient(145deg,#1c2233,#0d111c)!important;
-  border:1px solid rgba(255,255,255,.12)!important;
-  border-radius:26px!important;
-  box-shadow:0 30px 100px rgba(0,0,0,.6)!important;
+.bonk-watch-ad-btn{
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(135deg,#ffe66b 0%,#ffc928 48%,#ff9517 100%) !important;
+    color:#151004 !important;
+    box-shadow:0 12px 30px rgba(255,183,35,.24) !important;
 }
-.modal-overlay,.overlay{
-  background:rgba(0,0,0,.72)!important;
-  backdrop-filter:blur(12px)!important;
+.bonk-watch-ad-btn:before{
+    content:"";
+    position:absolute;top:0;left:-120%;width:70%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.38),transparent);
+    transform:skewX(-18deg);
+    animation:bonkAdShine 3.2s infinite;
 }
-table{border-collapse:separate!important;border-spacing:0 8px!important}
-tr{background:rgba(255,255,255,.035)!important}
-td,th{border:0!important;padding:14px 12px!important}
-tr td:first-child,tr th:first-child{border-radius:14px 0 0 14px!important}
-tr td:last-child,tr th:last-child{border-radius:0 14px 14px 0!important}
-hr{border-color:var(--bnk-border)!important}
-img{max-width:100%}
+@keyframes bonkAdShine{
+    0%,55%{left:-120%}
+    100%{left:150%}
+}
+.bonk-ad-modal,.bonk-reward-modal{
+    text-align:center;
+}
+.bonk-reward-icon{
+    width:72px;height:72px;
+    margin:0 auto 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:linear-gradient(145deg,#fff09a,#ffd43b,#f39a18);
+    color:#201400;
+    font-size:38px;
+    font-weight:1000;
+    box-shadow:0 12px 35px rgba(255,183,35,.3),inset 0 2px 5px rgba(255,255,255,.7);
+}
+.bonk-reward-total{
+    margin:16px 0 18px;
+    padding:13px;
+    border-radius:14px;
+    background:rgba(255,212,59,.08);
+    border:1px solid rgba(255,212,59,.2);
+    color:#aeb6c9;
+    font-size:13px;
+}
+.bonk-reward-total b{color:#ffd43b}
 @media(max-width:480px){
-  main,.container,.app-container,.content,.screen{width:100%;padding-left:14px;padding-right:14px}
-  .coin-btn,#coin-btn{width:min(74vw,265px)!important}
-  .card,.panel,.box,.stat-card,.balance-card,.feature-card{border-radius:20px!important}
-  nav,.bottom-nav,.navbar,.tab-bar,.navigation{margin:8px!important}
-}
-@media(prefers-reduced-motion:no-preference){
-  .coin-btn,#coin-btn{animation:bnk-float 4s ease-in-out infinite}
-  @keyframes bnk-float{0%,100%{translate:0 0}50%{translate:0 -5px}}
+    .bonk-balance-box{min-height:165px;padding:20px 16px 16px;border-radius:6px}
+    .bonk-balance-coin{width:78px;height:78px}
+    .bonk-balance-number #home-bonk-balance{font-size:31px}
 }
 </style>
 
@@ -1246,82 +1224,28 @@ img{max-width:100%}
     class="screen active"
 >
 
-    <div class="balance-header">
-
-        <div class="balance-title">
-            BALANCE
-        </div>
-
-        <div class="balance-amount">
-
-            ⚡
-
-            <span id="balance-val">
-                0
-            </span>
-
-        </div>
-
-    </div>
-
-
-    <div class="tap-area">
-
-        <button class="nft-fab" onclick="openNftPage()" aria-label="Open BONK NFT">NFT</button>
-
-        <div
-            class="coin-btn"
-            id="coin-btn"
-            onclick="handleTap()"
-        >
-
+    <div class="bonk-balance-box" id="bonk-balance-box" aria-label="BONK balance">
+        <div class="bonk-balance-box-title">Bonk Balance</div>
+        <div class="bonk-balance-box-body">
             <img
                 src="assets/bonk.png"
                 alt="BONK"
-                class="coin-img"
+                class="bonk-balance-coin"
                 onerror="this.src='https://cryptologos.cc/logos/bonk1-bonk-logo.png'"
             >
-
+            <div class="bonk-balance-number">
+                <span id="home-bonk-balance">0</span>
+                <span class="bonk-balance-unit">BONK</span>
+            </div>
         </div>
-
     </div>
-
-
-    <div class="energy-box">
-
-        <div class="energy-text">
-
-            ⚡
-
-            <span id="xp-val">
-                300
-            </span>
-
-            / 300
-
-        </div>
-
-
-        <div class="progress-bar">
-
-            <div
-                id="xp-fill"
-                class="progress-fill"
-                style="width:100%;"
-            ></div>
-
-        </div>
-
-    </div>
-
 
     <button
         id="ad-btn"
-        class="btn"
+        class="btn bonk-watch-ad-btn"
         onclick="openInstructionModal()"
-        disabled
     >
-        🎬 Watch Ads & Full Energy (+300 XP)
+        🎬 Watch Ads • Get BONK
     </button>
 
     <button class="btn" onclick="openContestScreen()" style="margin-top:12px;">🏆 BONK Daily Contest</button>
@@ -1587,13 +1511,13 @@ img{max-width:100%}
         <div class="input-group">
 
             <label>
-                Amount (Min: 1,000 BONK)
+                Amount (Min: 5,000 BONK)
             </label>
 
             <input
                 type="number"
                 id="withdraw-amount"
-                placeholder="Min 1000"
+                placeholder="Min 5000"
             >
 
         </div>
@@ -1811,39 +1735,34 @@ img{max-width:100%}
     class="modal"
     id="instructionModal"
 >
-
-    <div class="modal-content">
-
-        <div class="modal-title">
-            ⚡ Refill Energy
-        </div>
-
-
+    <div class="modal-content bonk-ad-modal">
+        <div class="modal-title">🎬 Watch Ads & Get BONK</div>
         <div class="modal-desc">
-
-            To successfully get
-            <b>+300 XP</b>:
-
+            Watch the ad for a minimum of <b>8 seconds</b>.
             <br><br>
-
-            Watch Ad for at least
-            <b>8 seconds</b>.
-
+            <span style="color:#ffd43b;font-weight:800;">💰 Reward: 50 BONK per valid ad</span>
         </div>
-
-
-        <button
-            class="modal-btn"
-            onclick="startAdsterraAd()"
-        >
-            UNDERSTOOD & WATCH AD
+        <button class="modal-btn" onclick="startAdsterraAd()">
+            ▶️ WATCH ADS
         </button>
-
     </div>
-
 </div>
 
-
+<div class="modal" id="bonkRewardModal">
+    <div class="modal-content bonk-reward-modal">
+        <div class="bonk-reward-icon">✓</div>
+        <div class="modal-title">BONK Added!</div>
+        <div class="modal-desc">
+            <b style="font-size:22px;color:#ffd43b;">+50 BONK</b>
+            <br><br>
+            has been added to your balance.
+        </div>
+        <div class="bonk-reward-total">
+            Total Balance: <b><span id="bonk-reward-total">0</span> BONK</b>
+        </div>
+        <button class="modal-btn" onclick="closeBonkRewardModal()">CONTINUE</button>
+    </div>
+</div>
 
 <!-- =====================================================
      MINING AD MODAL
@@ -2113,9 +2032,15 @@ if (
 // OTHER VARIABLES
 // =====================================================
 
+const AD_TRACKING_KEY = `bonk_ad_tracking_${telegramUserId}`;
+
 let adStartTime = 0;
 
 let isTrackingAd = false;
+
+let adLeftApp = false;
+
+let adVerificationInProgress = false;
 
 let isWithdrawSubmitting = false;
 
@@ -2863,140 +2788,42 @@ function updateUI() {
             'balance-val'
         );
 
+    const homeBalanceElement =
+        document.getElementById(
+            'home-bonk-balance'
+        );
 
     const withdrawBalanceElement =
         document.getElementById(
             'withdraw-balance-val'
         );
 
-
     if (balanceElement) {
-
         balanceElement.innerText =
             balance.toLocaleString();
-
     }
 
+    if (homeBalanceElement) {
+        homeBalanceElement.innerText =
+            balance.toLocaleString();
+    }
 
     if (withdrawBalanceElement) {
-
         withdrawBalanceElement.innerText =
             balance.toLocaleString();
-
     }
-
-
-    const xpElement =
-        document.getElementById(
-            'xp-val'
-        );
-
-
-    if (xpElement) {
-
-        xpElement.innerText =
-            xp;
-
-    }
-
-
-    const fillPercentage =
-        Math.max(
-            0,
-            Math.min(
-                100,
-                (xp / MAX_XP) * 100
-            )
-        );
-
-
-    const fillElement =
-        document.getElementById(
-            'xp-fill'
-        );
-
-
-    if (fillElement) {
-
-        fillElement.style.width =
-            fillPercentage + '%';
-
-    }
-
-
-    const adBtn =
-        document.getElementById(
-            'ad-btn'
-        );
-
-
-    if (adBtn) {
-
-        if (xp <= 0) {
-
-            adBtn.disabled = false;
-
-        }
-
-        else {
-
-            adBtn.disabled = true;
-
-        }
-
-    }
-
 
     updateTaskButtons();
     updateMiningUI();
-
 }
 
 
-// =====================================================
-// TAP
-// =====================================================
-function handleTap() {
-
-    if (xp >= 10) {
-
-        balance += nftIsActive ? 2 : 1;
-
-        xp -= 10;
-
-
-        saveBalance();
-
-        saveXP();
-
-
-        updateUI();
-
-    }
-
-    else {
-
-        alert(
-            "Out of Energy! Watch Ad to refill."
-        );
-
-    }
-
-}
-
 
 // =====================================================
-// AD MODAL
+// BONK AD REWARD MODAL
 // =====================================================
 
 function openInstructionModal() {
-
-    if (xp > 0) {
-
-        return;
-
-    }
-
 
     document.getElementById(
         "instructionModal"
@@ -3004,7 +2831,6 @@ function openInstructionModal() {
         "flex";
 
 }
-
 
 function closeInstructionModal() {
 
@@ -3017,198 +2843,123 @@ function closeInstructionModal() {
 
 
 // =====================================================
-// START AD
+// START BONK AD
 // =====================================================
 
 function startAdsterraAd() {
 
     closeInstructionModal();
 
-
-    const adBtn =
-        document.getElementById(
-            'ad-btn'
-        );
-
-
-    adBtn.disabled = true;
-
-
-    adBtn.innerText =
-        "⏳ Watching Ad...";
-
-
-    adStartTime =
-        Date.now();
-
-
+    adStartTime = Date.now();
     isTrackingAd = true;
+    adLeftApp = false;
 
-
-    openExternalLink(
-        ADSTERRA_DIRECT_LINK
+    localStorage.setItem(
+        AD_TRACKING_KEY,
+        JSON.stringify({
+            startedAt: adStartTime
+        })
     );
 
+    openExternalLink(ADSTERRA_DIRECT_LINK);
 }
 
 
 // =====================================================
-// AD RETURN
+// BONK AD RETURN VERIFICATION
 // =====================================================
 
-window.addEventListener(
-    'focus',
-    () => {
+function verifyAdRules(forceReturnCheck = false) {
 
-        if (isTrackingAd) {
+    if (adVerificationInProgress) return;
 
-            verifyAdRules();
+    const raw = localStorage.getItem(AD_TRACKING_KEY);
+    if (!raw) return;
 
-        }
-
-
-        checkWelcomeTaskReturn();
-
-    }
-);
-
-
-document.addEventListener(
-    'visibilitychange',
-    () => {
-
-        if (
-            document.visibilityState ===
-            'visible'
-        ) {
-
-            if (isTrackingAd) {
-
-                verifyAdRules();
-
-            }
-
-
-            checkWelcomeTaskReturn();
-
-        }
-
-    }
-);
-
-
-// =====================================================
-// VERIFY AD
-// =====================================================
-
-function verifyAdRules() {
-
-    if (!isTrackingAd) {
-
+    let state;
+    try {
+        state = JSON.parse(raw);
+    } catch (e) {
+        localStorage.removeItem(AD_TRACKING_KEY);
         return;
-
     }
 
+    const startedAt = Number(state.startedAt || 0);
+    if (!startedAt) return;
 
-    const totalWatchDuration =
-        (
-            Date.now() -
-            adStartTime
-        ) / 1000;
+    const elapsed = (Date.now() - startedAt) / 1000;
 
+    // The reward is checked only when the user actually returns to the app.
+    if (!forceReturnCheck && !adLeftApp) return;
 
+    adVerificationInProgress = true;
+    localStorage.removeItem(AD_TRACKING_KEY);
     isTrackingAd = false;
 
-
-    if (
-        totalWatchDuration < 8
-    ) {
-
+    if (elapsed < 8) {
+        adVerificationInProgress = false;
         alert(
-            "⚠️ Verification Failed!\n" +
-            "Aapko kam se kam 8 second ad dekhna zaroori hai."
+            "⚠️ Reward not added.\n\n" +
+            "You returned before 8 seconds. Please watch the ad for at least 8 seconds."
         );
-
-
-        resetAdButtonState();
-
-
         return;
-
     }
 
-
-    xp = MAX_XP;
-
-
-    saveXP();
-
-
+    balance += 50;
+    saveBalance();
     updateUI();
 
+    const totalElement = document.getElementById('bonk-reward-total');
+    if (totalElement) totalElement.innerText = balance.toLocaleString();
 
-    fetch(
-        `${BACKEND_URL}/api/bonk/recharge-energy`,
-        {
+    const rewardModal = document.getElementById('bonkRewardModal');
+    if (rewardModal) rewardModal.style.display = 'flex';
 
-            method: 'POST',
-
-            headers: {
-                'Content-Type':
-                    'application/json'
-            },
-
-            body: JSON.stringify({
-
-                userId:
-                    telegramUserId,
-
-                energyAmount:
-                    MAX_XP
-
-            })
-
-        }
-    )
-    .catch(
-        () => {}
-    );
-
-
-    alert(
-        "⚡ Energy Refilled to 300 XP!"
-    );
-
-
-    resetAdButtonState();
-
+    adVerificationInProgress = false;
 }
 
-
-// =====================================================
-// RESET AD BUTTON
-// =====================================================
-
-function resetAdButtonState() {
-
-    isTrackingAd = false;
-
-
-    const adBtn =
-        document.getElementById(
-            'ad-btn'
-        );
-
-
-    adBtn.innerText =
-        "🎬 Watch Ads & Full Energy (+300 XP)";
-
-
-    adBtn.disabled =
-        xp > 0;
-
+function closeBonkRewardModal() {
+    const modal = document.getElementById('bonkRewardModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
+function markAdReturnAndVerify() {
+    const pending = localStorage.getItem(AD_TRACKING_KEY);
+    if (!pending) return;
+
+    adLeftApp = true;
+    verifyAdRules(true);
+}
+
+window.addEventListener('blur', () => {
+    if (localStorage.getItem(AD_TRACKING_KEY)) {
+        adLeftApp = true;
+    }
+});
+
+window.addEventListener('focus', () => {
+    if (localStorage.getItem(AD_TRACKING_KEY)) {
+        markAdReturnAndVerify();
+    }
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        if (localStorage.getItem(AD_TRACKING_KEY)) adLeftApp = true;
+    } else {
+        markAdReturnAndVerify();
+    }
+});
+
+window.addEventListener('pageshow', () => {
+    const raw = localStorage.getItem(AD_TRACKING_KEY);
+    if (raw) {
+        adLeftApp = true;
+        verifyAdRules(true);
+    }
+});
 
 // =====================================================
 // WELCOME TASK
@@ -3728,11 +3479,11 @@ function submitWithdrawal() {
 
     if (
         isNaN(amount) ||
-        amount < 1000
+        amount < 5000
     ) {
 
         alert(
-            "Minimum withdrawal is 1,000 BONK!"
+            "Minimum withdrawal is 5,000 BONK!"
         );
 
         return;
@@ -4314,6 +4065,12 @@ miningTick = setInterval(() => {
 window.addEventListener(
     'DOMContentLoaded',
     () => {
+
+        // Recover an ad session if the external ad navigated away and the app loaded again.
+        if (localStorage.getItem(AD_TRACKING_KEY)) {
+            adLeftApp = true;
+            verifyAdRules(true);
+        }
 
         /*
             Initialize referral system.
