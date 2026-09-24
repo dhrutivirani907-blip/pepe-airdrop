@@ -1555,7 +1555,7 @@ nav a.active,.bottom-nav .active,.navbar .active,.tab-bar .active,.navigation .a
             <label>Total valid ads this week</label>
             <div id="contest-total-ads" style="font-size:28px;color:var(--gold);font-weight:800;">0</div>
         </div>
-        <button class="btn" onclick="startContestAd()">🎬 Watch Ads (8-second verification)</button>
+        <button id="contest-ad-btn" class="btn" onclick="startContestAd()">🎬 Watch Ads (8-second verification)</button>
         <button class="btn" onclick="openLeaderboard()">📊 See Your Rank</button>
         <button class="btn" style="background:#2c3540;color:#fff;" onclick="goHomeFromContest()">← Back</button>
         <div class="mining-notice">Contest runs for 1 day. Your daily target is 100 valid ads. Ad count is recorded after the app verifies your return.</div>
@@ -2039,6 +2039,11 @@ let adStartTime = 0;
 let isTrackingAd = false;
 
 let adLeftApp = false;
+
+let bonkAdCooldownTimer = null;
+let bonkAdCooldownEnd = 0;
+let contestAdCooldownTimer = null;
+let contestAdCooldownEnd = 0;
 
 let adVerificationInProgress = false;
 
@@ -2918,11 +2923,40 @@ function verifyAdRules(forceReturnCheck = false) {
     adVerificationInProgress = false;
 }
 
+function startBonkAdCooldown() {
+    const btn = document.getElementById('ad-btn');
+    if (!btn) return;
+
+    if (bonkAdCooldownTimer) clearInterval(bonkAdCooldownTimer);
+
+    bonkAdCooldownEnd = Date.now() + 7000;
+    btn.disabled = true;
+
+    const update = () => {
+        const remaining = Math.max(0, Math.ceil((bonkAdCooldownEnd - Date.now()) / 1000));
+
+        if (remaining > 0) {
+            btn.innerText = `⏳ Wait ${remaining}s`;
+        } else {
+            clearInterval(bonkAdCooldownTimer);
+            bonkAdCooldownTimer = null;
+            btn.disabled = false;
+            btn.innerText = '🎬 Watch Ads • Get BONK';
+        }
+    };
+
+    update();
+    bonkAdCooldownTimer = setInterval(update, 250);
+}
+
 function closeBonkRewardModal() {
     const modal = document.getElementById('bonkRewardModal');
     if (modal) {
         modal.style.display = 'none';
     }
+
+    // Start the 7-second cooldown only after the reward popup is closed.
+    startBonkAdCooldown();
 }
 
 function markAdReturnAndVerify() {
@@ -4236,9 +4270,38 @@ function startContestAd() {
         alert('Please save your Binance UID first.');
         return;
     }
+
+    if (contestAdCooldownEnd > Date.now()) return;
+
     contestAdStartTime = Date.now();
     contestAdTracking = true;
     openExternalLink(CONTEST_AD_LINK);
+}
+
+function startContestAdCooldown() {
+    const btn = document.getElementById('contest-ad-btn');
+    if (!btn) return;
+
+    if (contestAdCooldownTimer) clearInterval(contestAdCooldownTimer);
+
+    contestAdCooldownEnd = Date.now() + 7000;
+    btn.disabled = true;
+
+    const update = () => {
+        const remaining = Math.max(0, Math.ceil((contestAdCooldownEnd - Date.now()) / 1000));
+
+        if (remaining > 0) {
+            btn.innerText = `⏳ Wait ${remaining}s`;
+        } else {
+            clearInterval(contestAdCooldownTimer);
+            contestAdCooldownTimer = null;
+            btn.disabled = false;
+            btn.innerText = '🎬 Watch Ads (8-second verification)';
+        }
+    };
+
+    update();
+    contestAdCooldownTimer = setInterval(update, 250);
 }
 
 async function verifyContestAd() {
@@ -4261,6 +4324,7 @@ async function verifyContestAd() {
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to record ad');
         alert('✅ Valid contest ad recorded.');
+        startContestAdCooldown();
         loadContestStats();
     } catch (error) {
         alert('Could not record the ad. Please try again.');
