@@ -29,7 +29,6 @@
 <title>BONK Tap & Admin</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script id="monetag-rewarded-sdk" src="https://libtl.com/sdk.js" data-zone="11766459" data-sdk="show_11766459"></script>
 
 <script>
 // =====================================================
@@ -1273,7 +1272,7 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
             <div class="mining-progress"><i id="mining-progress-bar"></i></div>
         </div>
 
-        <div id="mining-cooldown-timer" style="display:none;text-align:center;margin:8px 0 10px;font-size:13px;font-weight:900;letter-spacing:.04em;">Next ad available in 15 seconds</div>
+        
         <button id="mining-ad-btn" class="mining-premium-btn" onclick="openMiningAdModal()">▶ WATCH AD • 0/20</button>
 
         <div class="mining-mini-grid">
@@ -1779,8 +1778,16 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
 <div class="modal" id="miningAdModal">
     <div class="modal-content">
         <div class="modal-title">🎬 Watch Ad</div>
-        <div class="modal-desc">Watch ads minimum <b>10 second</b> after 10 second clik on ads and bakc to the app.</div>
+        <div class="modal-desc">Watch ads minimum <b>8 second</b></div>
         <button class="modal-btn" onclick="startMiningAd()">WATCH ADS</button>
+    </div>
+</div>
+
+<div class="modal" id="miningAdStatusModal">
+    <div class="modal-content">
+        <div class="modal-title" id="miningAdStatusTitle">Your count Updated</div>
+        <div class="modal-desc" id="miningAdStatusText">Your ad count has been updated successfully.</div>
+        <button class="modal-btn" onclick="closeMiningAdStatusModal()">CLOSE</button>
     </div>
 </div>
 
@@ -4070,9 +4077,6 @@ let miningAdStartTime = 0;
 let miningAdTracking = false;
 let miningAdWasHidden = false;
 let miningAdRewarded = false;
-let miningCooldownUntil = parseInt(localStorage.getItem(`bonk_mining_cooldown_${telegramUserId}`) || '0');
-if (isNaN(miningCooldownUntil) || miningCooldownUntil < 0) miningCooldownUntil = 0;
-let miningCooldownTick = null;
 let miningTick = null;
 
 let miningAdCount = parseInt(localStorage.getItem(MINING_AD_COUNT_KEY));
@@ -4091,22 +4095,11 @@ function activeMiningMiners() {
 function updateMiningUI() {
     const miners = activeMiningMiners();
     const adBtn = document.getElementById('mining-ad-btn');
-    const cooldownEl = document.getElementById('mining-cooldown-timer');
-    const cooldownLeft = Math.max(0, miningCooldownUntil - Date.now());
-    const cooldownSeconds = Math.ceil(cooldownLeft / 1000);
-    const onCooldown = cooldownLeft > 0;
-
     if (adBtn) {
-        adBtn.disabled = onCooldown;
-        adBtn.style.opacity = onCooldown ? '0.55' : '1';
-        adBtn.style.pointerEvents = onCooldown ? 'none' : 'auto';
-        adBtn.innerText = onCooldown
-            ? `⏳ WAIT ${cooldownSeconds}s`
-            : (miningAdCount >= 19 ? '▶ WATCH AD • UNLOCK MINER' : `▶ WATCH AD • ${miningAdCount}/20`);
-    }
-    if (cooldownEl) {
-        cooldownEl.style.display = onCooldown ? 'block' : 'none';
-        cooldownEl.innerText = onCooldown ? `⏳ Next ad available in ${cooldownSeconds} second${cooldownSeconds === 1 ? '' : 's'}` : '';
+        adBtn.disabled = false;
+        adBtn.style.opacity = '1';
+        adBtn.style.pointerEvents = 'auto';
+        adBtn.innerText = miningAdCount >= 19 ? '▶ WATCH AD • UNLOCK MINER' : `▶ WATCH AD • ${miningAdCount}/20`;
     }
     const prog = document.getElementById('mining-ad-progress'); if (prog) prog.innerText = `${miningAdCount} / 20`;
     const bar = document.getElementById('mining-progress-bar'); if (bar) bar.style.width = `${Math.min(100, (miningAdCount/20)*100)}%`;
@@ -4119,76 +4112,33 @@ function updateMiningUI() {
     const ring = document.getElementById('mining-ring');
     if (ring) ring.classList.toggle('active', miners > 0);
     const bal = document.getElementById('mining-balance-val');
-    if (bal) bal.innerText = balance;
+    if (bal) bal.innerText = balance.toLocaleString();
+
+    // Keep the main Total BONK Balance live while mining.
+    const homeBalance = document.getElementById('home-bonk-balance');
+    if (homeBalance) homeBalance.innerText = balance.toLocaleString();
+
+    const topBalance = document.getElementById('balance-val');
+    if (topBalance) topBalance.innerText = balance.toLocaleString();
+
+    const withdrawBalance = document.getElementById('withdraw-balance-val');
+    if (withdrawBalance) withdrawBalance.innerText = balance.toLocaleString();
 }
 function openMiningAdModal() {
-    if (Date.now() < miningCooldownUntil) {
-        updateMiningUI();
-        return;
-    }
     if (miningAdCount >= 20) miningAdCount = 0;
     document.getElementById('miningAdModal').style.display = 'flex';
 }
-let monetagRewardedLoadingPromise = null;
-let monetagRewardedPreloaded = false;
+const MINING_AD_LINK = "https://www.profitableratecpmnetwork.com/ykjrqymy?key=2cbc4cbfc810935cd13e8d9c003f9225";
+const MINING_MIN_WATCH_MS = 8000;
 
-function loadMonetagRewardedSDK() {
-    if (typeof window.show_11766459 === 'function') {
-        return Promise.resolve(true);
-    }
-
-    if (monetagRewardedLoadingPromise) {
-        return monetagRewardedLoadingPromise;
-    }
-
-    monetagRewardedLoadingPromise = new Promise((resolve) => {
-        const existing = document.getElementById('monetag-rewarded-sdk');
-
-        if (!existing) {
-            const script = document.createElement('script');
-            script.id = 'monetag-rewarded-sdk';
-            script.src = 'https://libtl.com/sdk.js';
-            script.setAttribute('data-zone', '11766459');
-            script.setAttribute('data-sdk', 'show_11766459');
-            document.head.appendChild(script);
-        }
-
-        let checks = 0;
-        const timer = setInterval(() => {
-            if (typeof window.show_11766459 === 'function') {
-                clearInterval(timer);
-                resolve(true);
-            } else if (++checks >= 200) {
-                clearInterval(timer);
-                resolve(false);
-            }
-        }, 100);
-    });
-
-    return monetagRewardedLoadingPromise;
+function closeMiningAdStatusModal() {
+    document.getElementById('miningAdStatusModal').style.display = 'none';
 }
 
-async function preloadMonetagRewardedAd() {
-    try {
-        const ready = await loadMonetagRewardedSDK();
-        if (!ready || typeof window.show_11766459 !== 'function') {
-            console.warn('Monetag SDK is not ready for preload');
-            return false;
-        }
-
-        await window.show_11766459({
-            type: 'preload',
-            ymid: `bonk_preload_${telegramUserId || Date.now()}`
-        });
-
-        monetagRewardedPreloaded = true;
-        console.log('✅ Monetag rewarded ad preloaded');
-        return true;
-    } catch (error) {
-        monetagRewardedPreloaded = false;
-        console.warn('Monetag preload failed:', error);
-        return false;
-    }
+function showMiningAdStatus(title, message) {
+    document.getElementById('miningAdStatusTitle').textContent = title;
+    document.getElementById('miningAdStatusText').textContent = message;
+    document.getElementById('miningAdStatusModal').style.display = 'flex';
 }
 
 function startMiningAd() {
@@ -4197,148 +4147,79 @@ function startMiningAd() {
     if (miningAdTracking) return;
     miningAdTracking = true;
     miningAdWasHidden = false;
-    miningAdRewarded = false;
     miningAdStartTime = Date.now();
-    startMiningReturnFallbackTimer();
 
-    // Call Monetag directly from the user's WATCH ADS click.
-    loadMonetagRewardedSDK()
-        .then((ready) => {
-            if (!ready || typeof window.show_11766459 !== 'function') {
-                throw new Error('Monetag SDK not ready');
-            }
-
-            return window.show_11766459({
-                type: 'end',
-                ymid: `bonk_mining_${telegramUserId || Date.now()}_${Date.now()}`,
-                requestVar: 'mining_watch_ad'
-            });
-        })
-        .then(() => {
-            // Some Telegram/WebView versions do not reliably resolve the
-            // rewarded-ad Promise after the user returns. The visibility
-            // fallback below handles that case. If the Promise DOES resolve,
-            // this rewards the user immediately and only once.
-            if (miningAdTracking) verifyMiningAd(true);
-            monetagRewardedPreloaded = false;
-            setTimeout(() => preloadMonetagRewardedAd(), 500);
-        })
-        .catch((error) => {
-            console.error('Monetag rewarded ad error:', error);
-            // Do not cancel a tracked ad if the SDK rejects after the ad was
-            // actually shown; the return-to-app fallback can still verify it.
-            // Keep tracking alive here. In Chrome, Monetag can reject the
-            // Promise after the ad has already opened/closed, so the return
-            // detection below still needs to be allowed to count the ad.
-            if (!miningAdWasHidden) {
-                console.warn('Monetag promise rejected before return; waiting for return-to-app fallback.');
-            }
-        });
+    // Open the Adsterra Direct Link in a browser/new tab.
+    window.open(MINING_AD_LINK, '_blank');
 }
 
-function completeMiningAdFromReturn() {
-    if (!miningAdTracking || miningAdRewarded || !miningAdWasHidden) return;
+function finishMiningAdFromReturn() {
+    if (!miningAdTracking || !miningAdWasHidden) return;
 
     const watchedFor = Date.now() - miningAdStartTime;
-    if (watchedFor < 15000) return;
-
-    miningAdRewarded = true;
-    verifyMiningAd(true);
-    monetagRewardedPreloaded = false;
-    setTimeout(() => preloadMonetagRewardedAd(), 500);
-}
-
-// Monetag can return to the Telegram Mini App without resolving its JS
-// Promise. Detect the ad leaving/returning to the app and count it once.
-document.addEventListener('visibilitychange', () => {
-    if (!miningAdTracking) return;
-
-    if (document.visibilityState === 'hidden') {
-        miningAdWasHidden = true;
-    } else if (document.visibilityState === 'visible') {
-        completeMiningAdFromReturn();
-    }
-});
-
-window.addEventListener('blur', () => {
-    // Chrome often opens Monetag in a new tab/window, so visibilitychange
-    // may not be fired reliably on the original page. Blur is the fallback.
-    if (miningAdTracking) {
-        miningAdWasHidden = true;
-    }
-});
-
-window.addEventListener('focus', () => {
-    completeMiningAdFromReturn();
-});
-
-window.addEventListener('pageshow', () => {
-    completeMiningAdFromReturn();
-});
-
-// Chrome fallback: if Monetag opens/returns without firing a reliable
-// blur/visibility event, check after the required 10-second watch period.
-let miningReturnFallbackTimer = null;
-function startMiningReturnFallbackTimer() {
-    if (miningReturnFallbackTimer) clearTimeout(miningReturnFallbackTimer);
-    miningReturnFallbackTimer = setTimeout(() => {
-        miningReturnFallbackTimer = null;
-        if (!miningAdTracking) return;
-        if (Date.now() - miningAdStartTime >= 15000 && document.visibilityState === 'visible') {
-            miningAdWasHidden = true;
-            completeMiningAdFromReturn();
-        }
-    }, 15500);
-}
-
-// Start SDK loading/preloading after the Mini App has had time to initialize.
-setTimeout(() => {
-    preloadMonetagRewardedAd();
-}, 1500);
-
-function verifyMiningAd(rewarded = false) {
-    if (!miningAdTracking) return;
-
     miningAdTracking = false;
-    if (miningReturnFallbackTimer) {
-        clearTimeout(miningReturnFallbackTimer);
-        miningReturnFallbackTimer = null;
+    miningAdWasHidden = false;
+
+    if (watchedFor < MINING_MIN_WATCH_MS) {
+        showMiningAdStatus('⚠️ Watch Time Too Short', 'You must watch ads minimum 8 second');
+        return;
     }
 
-    if (!rewarded) return;
-    miningAdRewarded = true;
-
-    // Start a 10-second cooldown after each successful rewarded ad.
-    miningCooldownUntil = Date.now() + 15000;
-    localStorage.setItem(`bonk_mining_cooldown_${telegramUserId}`, String(miningCooldownUntil));
     miningAdCount++;
 
     if (miningAdCount >= 20) {
         miningAdCount = 0;
         miningExpiries.push(Date.now() + 180000);
         alert('⛏️ 1 BONK miner activated for 3 minutes!');
-    } else {
-        alert(`✅ Ad counted: ${miningAdCount}/20`);
     }
 
     saveMiningState();
     updateMiningUI();
+    showMiningAdStatus('✅ Your count Updated', `Your ad count is now ${miningAdCount}/20`);
 }
-if (miningCooldownTick) clearInterval(miningCooldownTick);
-miningCooldownTick = setInterval(() => {
-    if (miningCooldownUntil > 0 && Date.now() >= miningCooldownUntil) {
-        miningCooldownUntil = 0;
-        localStorage.removeItem(`bonk_mining_cooldown_${telegramUserId}`);
-    }
-    updateMiningUI();
-}, 250);
 
-if (miningTick) clearInterval(miningTick);
-miningTick = setInterval(() => {
-    const miners = activeMiningMiners();
-    if (miners > 0) { balance += miners * 3; saveBalance(); updateUI(); }
-    updateMiningUI();
-}, 1000);
+document.addEventListener('visibilitychange', () => {
+    if (!miningAdTracking) return;
+    if (document.visibilityState === 'hidden') {
+        miningAdWasHidden = true;
+    } else if (document.visibilityState === 'visible') {
+        finishMiningAdFromReturn();
+    }
+});
+
+window.addEventListener('blur', () => {
+    if (miningAdTracking) miningAdWasHidden = true;
+});
+
+window.addEventListener('focus', () => {
+    finishMiningAdFromReturn();
+});
+
+window.addEventListener('pageshow', () => {
+    finishMiningAdFromReturn();
+});
+
+// Keep mining rewards running while the app is open.
+// Each active miner earns exactly 3 BONK per second.
+if (!miningTick) {
+    miningTick = setInterval(() => {
+        const miners = activeMiningMiners();
+
+        if (miners > 0) {
+            balance += miners * 3;
+            saveBalance();
+        }
+
+        // Update every visible balance immediately on every mining tick.
+        // This keeps the Home Total BONK Balance live (3 BONK/sec per miner).
+        updateUI();
+        updateMiningUI();
+    }, 1000);
+}
+
+// Run once on load so already-expired miners are removed immediately.
+activeMiningMiners();
+updateMiningUI();
 
 // =====================================================
 // PAGE LOAD
