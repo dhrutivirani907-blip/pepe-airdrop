@@ -1169,32 +1169,42 @@ input:focus {
 
 /* ARCADE GAME LAYOUT FIX */
 #arcade-game-screen {
+    display:none !important;
     width:100% !important;
     max-width:760px !important;
-    align-self:stretch !important;
-    flex:0 0 auto !important;
+    min-width:0 !important;
+    align-self:center !important;
     box-sizing:border-box !important;
     padding:0 !important;
+    flex:0 0 auto !important;
 }
 #arcade-game-screen.active {
     display:flex !important;
+    width:100% !important;
+    max-width:760px !important;
     flex-direction:column !important;
     align-items:center !important;
+    justify-content:flex-start !important;
 }
-#arcade-game-screen .arcade-game-screen {
+#arcade-game-screen > #arcade-game-board {
     display:block !important;
-    width:min(100%, 440px) !important;
-    min-width:320px !important;
-    max-width:440px !important;
+    position:relative !important;
+    width:440px !important;
+    max-width:calc(100vw - 30px) !important;
+    min-width:0 !important;
+    height:640px !important;
     min-height:640px !important;
     box-sizing:border-box !important;
-    flex:0 0 auto !important;
+    flex:0 0 640px !important;
+    margin:0 auto !important;
 }
 @media (max-width:480px){
-    #arcade-game-screen .arcade-game-screen {
-        width:100% !important;
-        min-width:0 !important;
+    #arcade-game-screen > #arcade-game-board {
+        width:calc(100vw - 20px) !important;
+        max-width:calc(100vw - 20px) !important;
+        height:590px !important;
         min-height:590px !important;
+        flex-basis:590px !important;
     }
 }
 
