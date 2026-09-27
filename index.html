@@ -3356,13 +3356,23 @@ function startMonetagRewardedVideo(onSuccess, onFail, placement = 'bonk_rewarded
                 // non-valued impression is still a completed rewarded-ad
                 // interaction from the app's 15-second verification point of
                 // view. The app reward/count is granted exactly once.
-                const grant = () => {
-                    console.log('BONK rewarded-ad callback SUCCESS:', placement);
-                    finish(true);
-                };
+                // IMPORTANT: never wait outside the ad after it has closed.
+                // If Monetag resolves before 15 seconds, the user closed/finished
+                // the ad too early and MUST NOT receive a count/reward.
+                // The old code waited `remaining` milliseconds after the ad had
+                // already closed, which incorrectly rewarded an early close.
+                if (elapsed < MONETAG_REWARDED_MIN_WATCH_MS) {
+                    console.warn('Monetag rewarded ad closed before 15 seconds:', {
+                        placement,
+                        elapsedMs: elapsed,
+                        requiredMs: MONETAG_REWARDED_MIN_WATCH_MS
+                    });
+                    finish(false, 'short');
+                    return;
+                }
 
-                if (remaining > 0) setTimeout(grant, remaining);
-                else grant();
+                console.log('BONK rewarded-ad callback SUCCESS:', placement);
+                finish(true);
             })
             .catch((error) => {
                 console.error('Monetag rewarded video REJECTED:', error);
