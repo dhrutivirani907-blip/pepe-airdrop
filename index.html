@@ -30,6 +30,8 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+<script id="monetag-sdk" src="https://libtl.com/sdk.js" data-zone="11905347" data-sdk="show_11905347"></script>
+
 <script>
 // =====================================================
 // BONK NFT MEMBERSHIP
@@ -1608,7 +1610,7 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
 <div id="arcade-ad-modal" class="modal">
     <div class="modal-content arcade-modal-content">
         <div class="modal-title">WATCH ADS</div>
-        <div class="modal-desc">Watch ads minimum 8 second</div>
+        <div class="modal-desc">Watch ads minimum 15 second</div>
         <button class="modal-btn" onclick="startArcadeAd()">▶ WATCH ADS</button>
         <button class="modal-btn arcade-close-btn" onclick="closeArcadeAdModal()">CLOSE</button>
     </div>
@@ -1646,7 +1648,7 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
 <div id="arcade-claim-modal" class="modal">
     <div class="modal-content arcade-modal-content">
         <div class="modal-title">WATCH ADS</div>
-        <div class="modal-desc">Watch ads minimum 8 second</div>
+        <div class="modal-desc">Watch ads minimum 15 second</div>
         <button class="modal-btn" onclick="startArcadeClaimAd()">▶ WATCH ADS</button>
         <button class="modal-btn arcade-close-btn" onclick="closeArcadeClaimModal()">CLOSE</button>
     </div>
@@ -1936,7 +1938,7 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
             <label>Total valid ads this week</label>
             <div id="contest-total-ads" style="font-size:28px;color:var(--gold);font-weight:800;">0</div>
         </div>
-        <button id="contest-ad-btn" class="btn" onclick="startContestAd()">🎬 Watch Ads (8-second verification)</button>
+        <button id="contest-ad-btn" class="btn" onclick="startContestAd()">🎬 Watch Ads (15-second verification)</button>
         <button class="btn" onclick="openLeaderboard()">📊 See Your Rank</button>
         <button class="btn" style="background:#2c3540;color:#fff;" onclick="goHomeFromContest()">← Back</button>
         <div class="mining-notice">Contest runs for 1 day. Your daily target is 100 valid ads. Ad count is recorded after the app verifies your return.</div>
@@ -2115,7 +2117,7 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
     <div class="modal-content bonk-ad-modal premium-modal">
         <div class="premium-modal-icon">▶</div>
         <div class="modal-title">WATCH ADS & EARN BONK</div>
-        <div class="modal-desc">Return to the app after at least <b>8 seconds</b> to receive the reward.</div>
+        <div class="modal-desc">Return to the app after at least <b>15 seconds</b> to receive the reward.</div>
         <button class="modal-btn" onclick="startAdsterraAd()">WATCH ADS</button>
     </div>
 </div>
@@ -2148,7 +2150,7 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
 <div class="modal" id="miningAdModal">
     <div class="modal-content">
         <div class="modal-title">🎬 Watch Ad</div>
-        <div class="modal-desc">Watch ads minimum <b>8 second</b></div>
+        <div class="modal-desc">Watch ads minimum <b>15 second</b></div>
         <button class="modal-btn" onclick="startMiningAd()">WATCH ADS</button>
     </div>
 </div>
@@ -2279,11 +2281,8 @@ const WELCOME_TASK_LINK =
     "https://t.me/earn_doge_bywatchingads_bot?start=1912015558";
 
 
-const ADSTERRA_DIRECT_LINK =
-    "https://www.profitableratecpmnetwork.com/ykjrqymy?key=2cbc4cbfc810935cd13e8d9c003f9225";
-
-const MONETAG_DIRECT_LINK =
-    "https://omg10.com/4/11513244";
+const ADSTERRA_DIRECT_LINK = "";
+const MONETAG_DIRECT_LINK = "";
 
 
 const BACKEND_URL =
@@ -3238,17 +3237,196 @@ function closeInstructionModal() {
 
 
 // =====================================================
+// MONETAG REWARDED VIDEO (ZONE 11905347)
+// =====================================================
+const MONETAG_REWARDED_ZONE = '11905347';
+const MONETAG_REWARDED_FUNCTION = 'show_11905347';
+const MONETAG_REWARDED_MIN_WATCH_MS = 15000;
+let activeMonetagRewardSession = null;
+let monetagSdkReadyPromise = null;
+
+// The SDK must exist before any rewarded call. The SDK tag is placed in <head>
+// with HTTPS, and this loader also verifies that the global function actually
+// exists. This avoids silently waiting forever when the external SDK is blocked.
+function ensureMonetagSdkReady() {
+    if (typeof window[MONETAG_REWARDED_FUNCTION] === 'function') {
+        return Promise.resolve(true);
+    }
+    if (monetagSdkReadyPromise) return monetagSdkReadyPromise;
+
+    monetagSdkReadyPromise = new Promise((resolve, reject) => {
+        const script = document.getElementById('monetag-sdk');
+        let elapsed = 0;
+        const interval = 100;
+        const maxWait = 30000;
+        let done = false;
+
+        const finish = (ok, error) => {
+            if (done) return;
+            done = true;
+            clearInterval(timer);
+            monetagSdkReadyPromise = null;
+            if (ok) resolve(true);
+            else reject(error || new Error('Monetag SDK failed to initialize'));
+        };
+
+        const check = () => {
+            if (typeof window[MONETAG_REWARDED_FUNCTION] === 'function') {
+                finish(true);
+                return;
+            }
+            elapsed += interval;
+            if (elapsed >= maxWait) {
+                finish(false, new Error('Monetag SDK function show_11905347 was not created'));
+            }
+        };
+
+        const timer = setInterval(check, interval);
+
+        if (script) {
+            script.addEventListener('load', () => {
+                // SDK may create the global immediately after the load event.
+                setTimeout(check, 0);
+            }, { once: true });
+            script.addEventListener('error', () => {
+                finish(false, new Error('Monetag SDK script failed to load from https://libtl.com/sdk.js'));
+            }, { once: true });
+        }
+
+        check();
+    });
+
+    return monetagSdkReadyPromise;
+}
+
+function startMonetagRewardedVideo(onSuccess, onFail, placement = 'bonk_rewarded_video') {
+    if (activeMonetagRewardSession) return;
+
+    const session = {
+        startedAt: Date.now(),
+        finished: false,
+        onSuccess,
+        onFail
+    };
+    activeMonetagRewardSession = session;
+
+    const finish = (success, reason = '') => {
+        if (!activeMonetagRewardSession || activeMonetagRewardSession !== session || session.finished) return;
+        session.finished = true;
+        activeMonetagRewardSession = null;
+        if (success) {
+            try { onSuccess?.(); } catch (error) { console.error('Monetag success callback error:', error); }
+        } else {
+            try { onFail?.(reason); } catch (error) { console.error('Monetag failure callback error:', error); }
+        }
+    };
+
+    // IMPORTANT: keep this promise chain tied to the button click. Do not wait
+    // for a preload promise before invoking the rewarded method.
+    ensureMonetagSdkReady().then(() => {
+        if (session.finished || activeMonetagRewardSession !== session) return;
+
+        session.startedAt = Date.now();
+        let result;
+        try {
+            // Monetag's Telegram Mini App SDK documents the rewarded flow as
+            // show_ZONE().then(...). The Promise resolves after the rewarded
+            // ad has been watched. Keep this call simple and tied directly to
+            // the user's button click.
+            result = window[MONETAG_REWARDED_FUNCTION]();
+        } catch (error) {
+            console.error('Monetag rewarded video error:', error);
+            finish(false, 'error');
+            return;
+        }
+
+        Promise.resolve(result)
+            .then((adResult) => {
+                const elapsed = Date.now() - session.startedAt;
+                const remaining = Math.max(0, MONETAG_REWARDED_MIN_WATCH_MS - elapsed);
+                console.log('Monetag rewarded COMPLETED:', {
+                    placement,
+                    result: adResult,
+                    elapsedMs: elapsed,
+                    remainingVerificationMs: remaining
+                });
+
+                // Monetag's `end` Promise is the authoritative completion
+                // signal. Do not inspect reward_event_type here: even a
+                // non-valued impression is still a completed rewarded-ad
+                // interaction from the app's 15-second verification point of
+                // view. The app reward/count is granted exactly once.
+                const grant = () => {
+                    console.log('BONK rewarded-ad callback SUCCESS:', placement);
+                    finish(true);
+                };
+
+                if (remaining > 0) setTimeout(grant, remaining);
+                else grant();
+            })
+            .catch((error) => {
+                console.error('Monetag rewarded video REJECTED:', error);
+                finish(false, error?.message || 'closed');
+            });
+    }).catch((error) => {
+        console.error('Monetag SDK initialization failed:', error);
+        finish(false, 'load');
+    });
+}
+
+// Optional background preload. It is NOT required before a user presses
+// Watch Ads, because the rewarded show call must remain tied to that click.
+function preloadMonetagRewardedVideo() {
+    ensureMonetagSdkReady().then(() => {
+        try {
+            window[MONETAG_REWARDED_FUNCTION]('preload').then(() => {
+                console.log('Monetag rewarded ad preloaded');
+            }).catch((error) => {
+                console.warn('Monetag rewarded preload unavailable:', error);
+            });
+        } catch (error) {
+            console.warn('Monetag rewarded preload error:', error);
+        }
+    }).catch((error) => {
+        console.warn('Monetag SDK preload skipped:', error);
+    });
+}
+
+// Start preload only after DOM is available; never block the app or Watch Ads.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', preloadMonetagRewardedVideo, { once: true });
+} else {
+    preloadMonetagRewardedVideo();
+}
+
+// =====================================================
 // START BONK AD
 // =====================================================
 
 function startAdsterraAd() {
     closeInstructionModal();
     if (bonkAdCooldownEnd > Date.now()) return;
-    adStartTime = Date.now();
-    isTrackingAd = true;
-    adLeftApp = false;
-    localStorage.setItem(AD_TRACKING_KEY, JSON.stringify({startedAt: adStartTime}));
-    openExternalLink(ADSTERRA_DIRECT_LINK);
+
+    startMonetagRewardedVideo(() => {
+        const reward = 30;
+        balance += reward;
+        saveBalance();
+        updateUI();
+        const earned = document.getElementById('adssterra-earned-today');
+        if (earned) earned.textContent = `${reward} BONK`;
+        const amount = document.getElementById('bonk-reward-amount');
+        if (amount) amount.textContent = `+${reward}`;
+        const total = document.getElementById('bonk-reward-total');
+        if (total) total.textContent = balance.toLocaleString();
+        const modal = document.getElementById('bonkRewardModal');
+        if (modal) modal.style.display = 'flex';
+    }, (reason) => {
+        if (reason === 'short') {
+            alert('⚠️ Reward not added.\n\nYou returned before 15 seconds. Please watch the rewarded ad for at least 15 seconds.');
+        } else if (reason === 'load') {
+            alert('⚠️ Monetag rewarded ad is still loading. Please try again.');
+        }
+    });
 }
 
 function verifyAdRules(forceReturnCheck = false) {
@@ -3285,11 +3463,21 @@ function verifyAdRules(forceReturnCheck = false) {
 }
 
 function startMonetagAd() {
-    if (monetagVerificationInProgress || monetagAdTracking) return;
-    monetagAdStartTime = Date.now();
-    monetagAdTracking = true;
-    localStorage.setItem(MONETAG_AD_TRACKING_KEY, JSON.stringify({startedAt: monetagAdStartTime}));
-    openExternalLink(MONETAG_DIRECT_LINK);
+    startMonetagRewardedVideo(() => {
+        const reward = Math.floor(Math.random() * 21) + 20;
+        balance += reward;
+        saveBalance();
+        updateUI();
+        const modal = document.getElementById('monetagRewardModal');
+        const amount = document.getElementById('monetag-reward-amount');
+        const total = document.getElementById('monetag-reward-total');
+        if (amount) amount.textContent = `+${reward}`;
+        if (total) total.textContent = balance.toLocaleString();
+        if (modal) modal.style.display = 'flex';
+    }, (reason) => {
+        if (reason === 'short') alert('⚠️ Reward not added.\n\nYou returned before 15 seconds. Please watch the rewarded ad for at least 15 seconds.');
+        else if (reason === 'load') alert('⚠️ Monetag rewarded ad is still loading. Please try again.');
+    });
 }
 
 function verifyMonetagAd(forceReturnCheck = false) {
@@ -4506,8 +4694,7 @@ function openMiningAdModal() {
     if (miningAdCount >= 20) miningAdCount = 0;
     document.getElementById('miningAdModal').style.display = 'flex';
 }
-const MINING_AD_LINK = "https://www.profitableratecpmnetwork.com/ykjrqymy?key=2cbc4cbfc810935cd13e8d9c003f9225";
-const MINING_MIN_WATCH_MS = 8000;
+const MINING_MIN_WATCH_MS = 15000;
 
 function closeMiningAdStatusModal() {
     document.getElementById('miningAdStatusModal').style.display = 'none';
@@ -4521,39 +4708,39 @@ function showMiningAdStatus(title, message) {
 
 function startMiningAd() {
     document.getElementById('miningAdModal').style.display = 'none';
+    if (miningAdTracking || activeMonetagRewardSession) return;
 
-    if (miningAdTracking) return;
     miningAdTracking = true;
-    miningAdWasHidden = false;
     miningAdStartTime = Date.now();
 
-    // Open the Adsterra Direct Link in a browser/new tab.
-    window.open(MINING_AD_LINK, '_blank');
+    startMonetagRewardedVideo(() => {
+        miningAdTracking = false;
+        miningAdCount = Number.isFinite(miningAdCount) ? miningAdCount + 1 : 1;
+        console.log('MINING AD COUNT +1:', miningAdCount);
+        localStorage.setItem(MINING_AD_COUNT_KEY, String(miningAdCount));
+
+        if (miningAdCount >= 20) {
+            miningAdCount = 0;
+            miningExpiries.push(Date.now() + 180000);
+            alert('⛏️ 1 BONK miner activated for 3 minutes!');
+        }
+
+        saveMiningState();
+        updateMiningUI();
+        showMiningAdStatus('✅ Your count Updated', `Your ad count is now ${miningAdCount}/20`);
+    }, (reason) => {
+        miningAdTracking = false;
+        if (reason === 'short') {
+            showMiningAdStatus('⚠️ Watch Time Too Short', 'You must watch ads minimum 15 second');
+        } else if (reason === 'load') {
+            showMiningAdStatus('⚠️ Ad Loading', 'Monetag rewarded ad is still loading. Please try again.');
+        }
+    });
 }
 
 function finishMiningAdFromReturn() {
-    if (!miningAdTracking || !miningAdWasHidden) return;
-
-    const watchedFor = Date.now() - miningAdStartTime;
-    miningAdTracking = false;
-    miningAdWasHidden = false;
-
-    if (watchedFor < MINING_MIN_WATCH_MS) {
-        showMiningAdStatus('⚠️ Watch Time Too Short', 'You must watch ads minimum 8 second');
-        return;
-    }
-
-    miningAdCount++;
-
-    if (miningAdCount >= 20) {
-        miningAdCount = 0;
-        miningExpiries.push(Date.now() + 180000);
-        alert('⛏️ 1 BONK miner activated for 3 minutes!');
-    }
-
-    saveMiningState();
-    updateMiningUI();
-    showMiningAdStatus('✅ Your count Updated', `Your ad count is now ${miningAdCount}/20`);
+    // Mining rewards are finalized by the Monetag rewarded-video callback.
+    // This legacy return hook is intentionally kept as a no-op.
 }
 
 document.addEventListener('visibilitychange', () => {
@@ -4719,7 +4906,6 @@ document.addEventListener(
 // BONK DAILY CONTEST
 // =====================================================
 const BINANCE_ID_KEY = `bonk_binance_id_${telegramUserId}`;
-const CONTEST_AD_LINK = ADSTERRA_DIRECT_LINK;
 let contestAdStartTime = 0;
 let contestAdTracking = false;
 
@@ -4780,9 +4966,32 @@ function startContestAd() {
 
     if (contestAdCooldownEnd > Date.now()) return;
 
-    contestAdStartTime = Date.now();
-    contestAdTracking = true;
-    openExternalLink(CONTEST_AD_LINK);
+    startMonetagRewardedVideo(async () => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/bonk/contest/ad`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    userId: telegramUserId,
+                    binanceId: getSavedBinanceId()
+                })
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.message || 'Unable to record ad');
+            alert('✅ Valid contest ad recorded.');
+            startContestAdCooldown();
+            loadContestStats();
+        } catch (error) {
+            alert('Could not record the ad. Please try again.');
+            console.error(error);
+        }
+    }, (reason) => {
+        if (reason === 'short') {
+            alert('⚠️ Verification failed. Please watch the Monetag rewarded ad for at least 15 seconds.');
+        } else if (reason === 'load') {
+            alert('⚠️ Monetag rewarded ad is still loading. Please try again.');
+        }
+    });
 }
 
 function startContestAdCooldown() {
@@ -4803,7 +5012,7 @@ function startContestAdCooldown() {
             clearInterval(contestAdCooldownTimer);
             contestAdCooldownTimer = null;
             btn.disabled = false;
-            btn.innerText = '🎬 Watch Ads (8-second verification)';
+            btn.innerText = '🎬 Watch Ads (15-second verification)';
         }
     };
 
@@ -4816,7 +5025,7 @@ async function verifyContestAd() {
     const seconds = (Date.now() - contestAdStartTime) / 1000;
     contestAdTracking = false;
     if (seconds < 8) {
-        alert('Verification failed. Please watch the ad for at least 8 seconds.');
+        alert('Verification failed. Please watch the ad for at least 15 seconds.');
         return;
     }
     try {
@@ -4899,8 +5108,7 @@ document.addEventListener('visibilitychange', () => {
 // BONK ARCADE
 // =====================================================
 
-const ARCADE_AD_LINK = "https://www.profitableratecpmnetwork.com/ykjrqymy?key=2cbc4cbfc810935cd13e8d9c003f9225";
-const ARCADE_MIN_WATCH_MS = 8000;
+const ARCADE_MIN_WATCH_MS = 15000;
 const ARCADE_AD_COUNT_KEY = 'bonk_arcade_ad_count_v1';
 const ARCADE_AD_TRACK_KEY = 'bonk_arcade_ad_tracking_v1';
 
@@ -4978,18 +5186,30 @@ function closeArcadeAdResult() {
 
 function startArcadeAd() {
     closeArcadeAdModal();
-    if (arcadeAdTracking || arcadeAdVerificationBusy) return;
+    if (arcadeAdTracking || arcadeAdVerificationBusy || activeMonetagRewardSession) return;
 
-    arcadeAdPurpose = 'play';
-    arcadeAdStartTime = Date.now();
-    arcadeAdWasHidden = false;
     arcadeAdTracking = true;
-    localStorage.setItem(ARCADE_AD_TRACK_KEY, JSON.stringify({
-        startedAt: arcadeAdStartTime,
-        purpose: arcadeAdPurpose
-    }));
+    arcadeAdPurpose = 'play';
+    startMonetagRewardedVideo(() => {
+        arcadeAdTracking = false;
+        arcadeAdCount = Math.min(2, Number.isFinite(arcadeAdCount) ? arcadeAdCount + 1 : 1);
+        console.log('ARCADE AD COUNT +1:', arcadeAdCount);
+        localStorage.setItem(ARCADE_AD_COUNT_KEY, String(arcadeAdCount));
+        updateArcadeAdProgress();
 
-    openExternalLink(ARCADE_AD_LINK);
+        if (arcadeAdCount >= 2) {
+            showArcadeAdResult('✅ Your count Updated', '2 ads completed. Play Game is now unlocked.');
+        } else {
+            showArcadeAdResult('✅ Your count Updated', `Your ad count is now ${arcadeAdCount}/2`);
+        }
+    }, (reason) => {
+        arcadeAdTracking = false;
+        if (reason === 'short') {
+            showArcadeAdResult('⚠️ Watch Time Too Short', 'You must watch ads minimum 15 second');
+        } else if (reason === 'load') {
+            showArcadeAdResult('⚠️ Ad Loading', 'Monetag rewarded ad is still loading. Please try again.');
+        }
+    });
 }
 
 function verifyArcadeAdReturn() {
@@ -5021,7 +5241,7 @@ function verifyArcadeAdReturn() {
         localStorage.removeItem(ARCADE_AD_TRACK_KEY);
         showArcadeAdResult(
             '⚠️ Watch Time Too Short',
-            'You must watch ads minimum 8 second'
+            'You must watch ads minimum 15 second'
         );
         arcadeAdVerificationBusy = false;
         return;
@@ -5256,19 +5476,28 @@ function closeArcadeGameResult() {
 
 function startArcadeClaimAd() {
     closeArcadeClaimModal();
-    if (arcadeAdTracking || arcadeAdVerificationBusy) return;
+    if (arcadeAdTracking || arcadeAdVerificationBusy || activeMonetagRewardSession) return;
 
-    arcadeAdPurpose = 'claim';
-    arcadeAdStartTime = Date.now();
-    arcadeAdWasHidden = false;
     arcadeAdTracking = true;
+    arcadeAdPurpose = 'claim';
+    startMonetagRewardedVideo(() => {
+        arcadeAdTracking = false;
+        const reward = Math.max(0, Math.floor(arcadePendingReward));
+        balance += reward;
+        saveBalance();
+        updateUI();
 
-    localStorage.setItem(ARCADE_AD_TRACK_KEY, JSON.stringify({
-        startedAt: arcadeAdStartTime,
-        purpose: arcadeAdPurpose
-    }));
-
-    openExternalLink(ARCADE_AD_LINK);
+        document.getElementById('arcade-reward-result-text').textContent =
+            `Your ${reward} BONK added in your balance`;
+        document.getElementById('arcade-reward-result-modal').style.display = 'flex';
+    }, (reason) => {
+        arcadeAdTracking = false;
+        if (reason === 'short') {
+            showArcadeAdResult('⚠️ Watch Time Too Short', 'You must watch ads minimum 15 second');
+        } else if (reason === 'load') {
+            showArcadeAdResult('⚠️ Ad Loading', 'Monetag rewarded ad is still loading. Please try again.');
+        }
+    });
 }
 
 function closeArcadeClaimModal() {
