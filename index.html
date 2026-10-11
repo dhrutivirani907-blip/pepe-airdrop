@@ -28,6 +28,7 @@
 <title>BONK Tap & Admin</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
 
 <script>
@@ -2150,6 +2151,8 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
         <div class="modal-title">🎬 Watch Ad</div>
         <div class="modal-desc">Watch ads minimum <b>8 second</b></div>
         <button class="modal-btn" onclick="startMiningAd()">WATCH ADS</button>
+        <button class="modal-btn" id="adsgram-watch-btn" style="margin-top:10px;background:linear-gradient(135deg,#39a9ff,#1769d2);" onclick="startAdsGramAd()">WATCH ADS WITH ADSGRAM</button>
+        <div id="adsgram-status" style="margin-top:10px;font-size:12px;color:var(--text-muted);">AdsGram rewarded ads</div>
     </div>
 </div>
 
@@ -2286,6 +2289,11 @@ const MONETAG_DIRECT_LINK = "";
 const BACKEND_URL =
     "https://pepe-backend-wkym.onrender.com";
 
+// AdsGram rewarded-ad settings. Replace with your Block ID from AdsGram Publisher.
+const ADSGRAM_BLOCK_ID = "YOUR_ADSGRAM_BLOCK_ID";
+const ADSGRAM_REWARD_AMOUNT = 30;
+let adsGramController = null;
+let adsGramAdInProgress = false;
 
 const TELEGRAM_BOT_USERNAME =
     "PEPE_Faucet_Airdrop_bot";
@@ -4657,6 +4665,61 @@ function showMiningAdStatus(title, message) {
     document.getElementById('miningAdStatusTitle').textContent = title;
     document.getElementById('miningAdStatusText').textContent = message;
     document.getElementById('miningAdStatusModal').style.display = 'flex';
+}
+
+async function startAdsGramAd() {
+    const status = document.getElementById('adsgram-status');
+    const button = document.getElementById('adsgram-watch-btn');
+    if (adsGramAdInProgress) return;
+
+    if (!window.Telegram || !window.Telegram.WebApp || !window.Telegram.WebApp.initDataUnsafe || !window.Telegram.WebApp.initDataUnsafe.user) {
+        if (status) status.textContent = 'Please open this mini app inside Telegram.';
+        alert('Please open this mini app inside Telegram to watch AdsGram ads.');
+        return;
+    }
+    if (!ADSGRAM_BLOCK_ID || ADSGRAM_BLOCK_ID === 'YOUR_ADSGRAM_BLOCK_ID') {
+        if (status) status.textContent = 'Set your AdsGram Block ID in the HTML first.';
+        alert('AdsGram setup required: replace YOUR_ADSGRAM_BLOCK_ID with your Block ID from AdsGram Publisher.');
+        return;
+    }
+    if (!window.Adsgram || typeof window.Adsgram.init !== 'function') {
+        if (status) status.textContent = 'AdsGram SDK is still loading. Please try again.';
+        alert('AdsGram could not load. Check your internet connection and try again.');
+        return;
+    }
+
+    adsGramAdInProgress = true;
+    if (button) button.disabled = true;
+    if (status) status.textContent = 'Loading AdsGram ad...';
+    try {
+        if (!adsGramController) adsGramController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+        const result = await adsGramController.show();
+        if (!result || result.error || result.done !== true) {
+            if (status) status.textContent = 'Ad not completed. No reward added.';
+            alert('Ad was not completed. No BONK reward was added. Please try again.');
+            return;
+        }
+
+        // Existing app balance is stored in localStorage. The AdsGram Reward URL
+        // separately records the server-to-server callback in the backend database.
+        balance += ADSGRAM_REWARD_AMOUNT;
+        saveBalance();
+        updateUI();
+        const amount = document.getElementById('bonk-reward-amount');
+        const total = document.getElementById('bonk-reward-total');
+        if (amount) amount.textContent = '+' + ADSGRAM_REWARD_AMOUNT;
+        if (total) total.textContent = balance.toLocaleString();
+        const modal = document.getElementById('bonkRewardModal');
+        if (modal) modal.style.display = 'flex';
+        if (status) status.textContent = 'Reward added: ' + ADSGRAM_REWARD_AMOUNT + ' BONK.';
+    } catch (error) {
+        console.error('[AdsGram] Ad error:', error);
+        if (status) status.textContent = 'No ad available or ad failed. Please try again later.';
+        alert('AdsGram ad could not be completed. No reward was added. Please try again later.');
+    } finally {
+        adsGramAdInProgress = false;
+        if (button) button.disabled = false;
+    }
 }
 
 function startMiningAd() {
