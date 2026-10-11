@@ -2151,8 +2151,8 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
         <div class="modal-title">🎬 Watch Ad</div>
         <div class="modal-desc">Watch ads minimum <b>8 second</b></div>
         <button class="modal-btn" onclick="startMiningAd()">WATCH ADS</button>
-        <button class="modal-btn" id="adsgram-watch-btn" style="margin-top:10px;background:linear-gradient(135deg,#39a9ff,#1769d2);" onclick="startAdsGramAd()">WATCH ADS WITH ADSGRAM</button>
-        <div id="adsgram-status" style="margin-top:10px;font-size:12px;color:var(--text-muted);">AdsGram rewarded ads</div>
+        <button class="modal-btn" id="adsgram-watch-btn" style="margin-top:10px;background:linear-gradient(135deg,#39a9ff,#1769d2);" onclick="startAdsGramAd()">WATCH ADS WITH ADSGRAM • <span id="adsgram-daily-count">0/50</span></button>
+        <div id="adsgram-status" style="margin-top:10px;font-size:12px;color:var(--text-muted);">AdsGram: 100 BONK per ad • 50 ads daily</div>
     </div>
 </div>
 
@@ -2196,6 +2196,84 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
 </div>
 
 
+
+<!-- PREMIUM TELEGRAM JOIN GATE -->
+<style>
+#telegram-join-gate{display:none;position:fixed;inset:0;z-index:100000;background:radial-gradient(circle at top,#30230a 0%,#090a0d 62%);align-items:center;justify-content:center;padding:18px;overflow:auto}
+#telegram-join-gate .join-panel{width:100%;max-width:420px;border:1px solid rgba(243,186,47,.55);border-radius:25px;padding:24px 18px;background:linear-gradient(160deg,#1d2026,#0e1014);box-shadow:0 20px 70px #000b,0 0 30px #f3ba2f20;text-align:center}
+#telegram-join-gate .join-crown{font-size:34px;margin-bottom:6px}
+#telegram-join-gate .join-heading{font-size:24px;font-weight:950;color:#f3ba2f;letter-spacing:.4px}
+#telegram-join-gate .join-caption{font-size:13px;line-height:1.5;color:#c5c6c7;margin:9px 0 20px}
+#telegram-join-gate .join-channel{display:flex;align-items:center;gap:10px;padding:12px;margin:12px 0;background:#11151b;border:1px solid #343944;border-radius:15px;text-align:left}
+#telegram-join-gate .tg-logo{width:40px;height:40px;flex:0 0 40px;border-radius:50%;background:#229ed9;display:flex;align-items:center;justify-content:center;color:white;font-size:21px}
+#telegram-join-gate .join-name{font-size:13px;font-weight:850;color:#fff;flex:1;line-height:1.3}
+#telegram-join-gate .join-action{min-width:82px;border:0;border-radius:9px;padding:10px 9px;background:linear-gradient(135deg,#f3ba2f,#ffdc73);font-size:12px;font-weight:900;color:#111}
+#telegram-join-gate .join-action.verified{background:#1c9c57;color:white;font-size:19px;min-width:48px}
+#telegram-join-gate .join-continue{width:100%;margin-top:13px;padding:14px;border:0;border-radius:13px;background:linear-gradient(135deg,#f3ba2f,#f1a80a);font-size:14px;font-weight:950;color:#111}
+#telegram-join-gate .join-continue:disabled{opacity:.45}
+</style>
+<div id="telegram-join-gate" role="dialog" aria-modal="true" aria-labelledby="join-gate-title">
+  <div class="join-panel">
+    <div class="join-crown">👑</div>
+    <div class="join-heading" id="join-gate-title">BONK PREMIUM ACCESS</div>
+    <div class="join-caption">Join both official Telegram channels to continue using the app.</div>
+    <div class="join-channel">
+      <div class="tg-logo">➤</div><div class="join-name">Bonk Payment Proof</div>
+      <button class="join-action" id="join-channel-1" onclick="openRequiredTelegramChannel(1)">JOIN NOW</button>
+    </div>
+    <div class="join-channel">
+      <div class="tg-logo">➤</div><div class="join-name">Bonk Taping Officials</div>
+      <button class="join-action" id="join-channel-2" onclick="openRequiredTelegramChannel(2)">JOIN NOW</button>
+    </div>
+    <button class="join-continue" id="join-gate-continue" onclick="confirmTelegramChannelsJoined()" disabled>I WILL JOINED</button>
+    <div style="font-size:10px;color:#8d929c;margin-top:10px">After joining both channels, return here and tap the button above.</div>
+  </div>
+</div>
+<script>
+(function(){
+  const DONE_KEY='bonk_telegram_channels_confirmed_v1';
+  const CHECK_KEY='bonk_telegram_channels_checked_v1';
+  let checks={1:false,2:false};
+  try{checks=Object.assign(checks,JSON.parse(localStorage.getItem(CHECK_KEY)||'{}'));}catch(e){}
+  function paint(){
+    [1,2].forEach(n=>{
+      const b=document.getElementById('join-channel-'+n); if(!b)return;
+      b.textContent=checks[n]?'✓':'JOIN NOW';
+      b.classList.toggle('verified',!!checks[n]);
+      b.setAttribute('aria-label',checks[n]?'Channel marked as joined':'Open Telegram channel');
+    });
+    const c=document.getElementById('join-gate-continue');
+    if(c)c.disabled=!(checks[1]&&checks[2]);
+  }
+  window.openRequiredTelegramChannel=function(n){
+    sessionStorage.setItem('bonk_pending_join_channel',String(n));
+    const urls={1:'https://t.me/bonk_taping',2:'https://t.me/Bonk_official'};
+    window.open(urls[n],'_blank');
+  };
+  function markPendingJoin(){
+    const n=Number(sessionStorage.getItem('bonk_pending_join_channel')||0);
+    if(n===1||n===2 && document.visibilityState==='visible'){
+      checks[n]=true;
+      localStorage.setItem(CHECK_KEY,JSON.stringify(checks));
+      sessionStorage.removeItem('bonk_pending_join_channel');
+      paint();
+    }
+  }
+  window.confirmTelegramChannelsJoined=function(){
+    if(!(checks[1]&&checks[2]))return;
+    localStorage.setItem(DONE_KEY,'1');
+    const gate=document.getElementById('telegram-join-gate'); if(gate)gate.style.display='none';
+  };
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')markPendingJoin();});
+  window.addEventListener('focus',()=>{if(document.visibilityState==='visible')markPendingJoin();});
+  window.addEventListener('DOMContentLoaded',()=>{
+    paint();
+    if(localStorage.getItem(DONE_KEY)!=='1'){
+      const gate=document.getElementById('telegram-join-gate'); if(gate)gate.style.display='flex';
+    }
+  });
+})();
+</script>
 
 <!-- =====================================================
      NAVBAR
@@ -2291,7 +2369,10 @@ const BACKEND_URL =
 
 // AdsGram rewarded-ad settings. Replace with your Block ID from AdsGram Publisher.
 const ADSGRAM_BLOCK_ID = "53332";
-const ADSGRAM_REWARD_AMOUNT = 30;
+const ADSGRAM_REWARD_AMOUNT = 100;
+const ADSGRAM_DAILY_LIMIT = 50;
+const ADSGRAM_DAILY_KEY = "bonk_adsgram_daily_v1";
+let adsGramDailyState = null;
 let adsGramController = null;
 let adsGramAdInProgress = false;
 
@@ -4667,10 +4748,34 @@ function showMiningAdStatus(title, message) {
     document.getElementById('miningAdStatusModal').style.display = 'flex';
 }
 
+function getAdsGramDailyState() {
+    const today = new Date().toLocaleDateString('en-CA');
+    try {
+        const saved = JSON.parse(localStorage.getItem(ADSGRAM_DAILY_KEY) || 'null');
+        if (saved && saved.date === today) return saved;
+    } catch (e) {}
+    return { date: today, count: 0 };
+}
+function updateAdsGramDailyUI() {
+    adsGramDailyState = getAdsGramDailyState();
+    const label = document.getElementById('adsgram-daily-count');
+    if (label) label.textContent = `${adsGramDailyState.count}/${ADSGRAM_DAILY_LIMIT}`;
+    const button = document.getElementById('adsgram-watch-btn');
+    if (button && !adsGramAdInProgress) button.disabled = adsGramDailyState.count >= ADSGRAM_DAILY_LIMIT;
+    const status = document.getElementById('adsgram-status');
+    if (status && adsGramDailyState.count >= ADSGRAM_DAILY_LIMIT) status.textContent = 'Daily limit reached. Come back tomorrow.';
+}
+
 async function startAdsGramAd() {
     const status = document.getElementById('adsgram-status');
     const button = document.getElementById('adsgram-watch-btn');
     if (adsGramAdInProgress) return;
+    adsGramDailyState = getAdsGramDailyState();
+    if (adsGramDailyState.count >= ADSGRAM_DAILY_LIMIT) {
+        updateAdsGramDailyUI();
+        if (status) status.textContent = 'Daily limit reached (50/50). Come back tomorrow.';
+        return;
+    }
 
     if (!window.Telegram || !window.Telegram.WebApp || !window.Telegram.WebApp.initDataUnsafe || !window.Telegram.WebApp.initDataUnsafe.user) {
         if (status) status.textContent = 'Please open this mini app inside Telegram.';
@@ -4702,8 +4807,18 @@ async function startAdsGramAd() {
 
         // Existing app balance is stored in localStorage. The AdsGram Reward URL
         // separately records the server-to-server callback in the backend database.
+        // Count only successfully completed AdsGram ads. The limit resets each local calendar day.
+        adsGramDailyState = getAdsGramDailyState();
+        if (adsGramDailyState.count >= ADSGRAM_DAILY_LIMIT) {
+            updateAdsGramDailyUI();
+            if (status) status.textContent = 'Daily limit reached. Come back tomorrow.';
+            return;
+        }
+        adsGramDailyState.count += 1;
+        localStorage.setItem(ADSGRAM_DAILY_KEY, JSON.stringify(adsGramDailyState));
         balance += ADSGRAM_REWARD_AMOUNT;
         saveBalance();
+        updateAdsGramDailyUI();
         updateUI();
         const amount = document.getElementById('bonk-reward-amount');
         const total = document.getElementById('bonk-reward-total');
@@ -4718,7 +4833,8 @@ async function startAdsGramAd() {
         alert('AdsGram ad could not be completed. No reward was added. Please try again later.');
     } finally {
         adsGramAdInProgress = false;
-        if (button) button.disabled = false;
+        updateAdsGramDailyUI();
+        if (button && getAdsGramDailyState().count < ADSGRAM_DAILY_LIMIT) button.disabled = false;
     }
 }
 
@@ -4821,6 +4937,7 @@ window.addEventListener(
         */
 
         initializeReferral();
+        updateAdsGramDailyUI();
 
 
         /*
