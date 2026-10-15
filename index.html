@@ -2215,14 +2215,14 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
 <div id="telegram-join-gate" role="dialog" aria-modal="true" aria-labelledby="join-gate-title">
   <div class="join-panel">
     <div class="join-crown">👑</div>
-    <div class="join-heading" id="join-gate-title">BONK PREMIUM ACCESS</div>
-    <div class="join-caption">Join both official Telegram channels to continue using the app.</div>
+    <div class="join-heading" id="join-gate-title">VB PREMIUM ACCESS</div>
+    <div class="join-caption">Join both official Telegram channels, return here, then tap “I WILL JOINED” to continue.</div>
     <div class="join-channel">
-      <div class="tg-logo">➤</div><div class="join-name">Bonk Payment Proof</div>
+      <div class="tg-logo" aria-label="Telegram logo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M21.7 4.3 18.6 19c-.2 1-1 1.2-1.8.8l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.3-8.4c.4-.4-.1-.6-.6-.2L6 12.4 1.1 10.9c-1-.3-1-1 .2-1.5L20.4 2c.9-.3 1.7.2 1.3 2.3Z"/></svg></div><div class="join-name">VB Payment Proof</div>
       <button class="join-action" id="join-channel-1" onclick="openRequiredTelegramChannel(1)">JOIN NOW</button>
     </div>
     <div class="join-channel">
-      <div class="tg-logo">➤</div><div class="join-name">Bonk Taping Officials</div>
+      <div class="tg-logo" aria-label="Telegram logo"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M21.7 4.3 18.6 19c-.2 1-1 1.2-1.8.8l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.3-8.4c.4-.4-.1-.6-.6-.2L6 12.4 1.1 10.9c-1-.3-1-1 .2-1.5L20.4 2c.9-.3 1.7.2 1.3 2.3Z"/></svg></div><div class="join-name">VB Earner's Officials</div>
       <button class="join-action" id="join-channel-2" onclick="openRequiredTelegramChannel(2)">JOIN NOW</button>
     </div>
     <button class="join-continue" id="join-gate-continue" onclick="confirmTelegramChannelsJoined()" disabled>I WILL JOINED</button>
@@ -2231,8 +2231,8 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
 </div>
 <script>
 (function(){
-  const DONE_KEY='bonk_telegram_channels_confirmed_v1';
-  const CHECK_KEY='bonk_telegram_channels_checked_v1';
+  const DONE_KEY='vb_telegram_channels_confirmed_v1';
+  const CHECK_KEY='vb_telegram_channels_checked_v1';
   let checks={1:false,2:false};
   try{checks=Object.assign(checks,JSON.parse(localStorage.getItem(CHECK_KEY)||'{}'));}catch(e){}
   function paint(){
@@ -2246,16 +2246,16 @@ html,body{background:#050505!important;color:var(--cream)!important} body{font-f
     if(c)c.disabled=!(checks[1]&&checks[2]);
   }
   window.openRequiredTelegramChannel=function(n){
-    sessionStorage.setItem('bonk_pending_join_channel',String(n));
+    sessionStorage.setItem('vb_pending_join_channel',String(n));
     const urls={1:'https://t.me/bonk_taping',2:'https://t.me/Bonk_official'};
     window.open(urls[n],'_blank');
   };
   function markPendingJoin(){
-    const n=Number(sessionStorage.getItem('bonk_pending_join_channel')||0);
-    if(n===1||n===2 && document.visibilityState==='visible'){
+    const n=Number(sessionStorage.getItem('vb_pending_join_channel')||0);
+    if((n===1||n===2) && document.visibilityState==='visible'){
       checks[n]=true;
       localStorage.setItem(CHECK_KEY,JSON.stringify(checks));
-      sessionStorage.removeItem('bonk_pending_join_channel');
+      sessionStorage.removeItem('vb_pending_join_channel');
       paint();
     }
   }
