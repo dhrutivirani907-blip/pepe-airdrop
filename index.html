@@ -1767,14 +1767,14 @@ input:focus{border-color:#37dfff!important}
         <div class="input-group">
 
             <label>
-                Amount (Min: 0.01 GRAM)
+                Amount (Min: 0.005 GRAM)
             </label>
 
             <input
                 type="number"
                 id="withdraw-amount"
-                step="0.00000001" min="0.01"
-                placeholder="Min 0.01"
+                step="0.00000001" min="0.005"
+                placeholder="Min 0.005"
             >
 
         </div>
@@ -4034,11 +4034,11 @@ function submitWithdrawal() {
 
     if (
         isNaN(amount) ||
-        amount < 0.01
+        amount < 0.005
     ) {
 
         alert(
-            "Minimum withdrawal is 0.01 GRAM!"
+            "Minimum withdrawal is 0.005 GRAM!"
         );
 
         return;
@@ -4464,15 +4464,43 @@ function fetchWithdrawals() {
 // USER GRAM WITHDRAWAL HISTORY
 // =====================================================
 async function loadGramWithdrawalHistory(){
-  const box=document.getElementById('gram-withdraw-history'); if(!box)return;
-  if(!telegramUserId||telegramUserId==='guest'){box.innerHTML='<div class="gram-history-empty">Open this app in Telegram to view your withdrawal history.</div>';return;}
+  const box=document.getElementById('gram-withdraw-history');
+  if(!box)return;
+
+  // Browser testing uses the same "guest" ID that the withdrawal API saves.
+  // Telegram users continue to use their unique Telegram numeric ID.
+  const historyUserId = String(telegramUserId || 'guest');
+
+  box.innerHTML='<div class="gram-history-empty">Loading your withdrawal requests...</div>';
+
   try{
-    const response=await fetch(`${BACKEND_URL}/api/gram/withdrawals/${encodeURIComponent(telegramUserId)}`);
-    const data=await response.json(); if(!response.ok||!data.success)throw new Error(data.message||'History unavailable');
+    const response=await fetch(`${BACKEND_URL}/api/gram/withdrawals/${encodeURIComponent(historyUserId)}`);
+    const data=await response.json();
+    if(!response.ok||!data.success)throw new Error(data.message||'History unavailable');
+
     const rows=Array.isArray(data.withdrawals)?data.withdrawals:[];
-    if(!rows.length){box.innerHTML='<div class="gram-history-empty">No withdrawal requests yet.</div>';return;}
-    box.innerHTML=rows.map(item=>{const status=String(item.status||'Pending');const cls=status.toLowerCase();const date=item.createdAt?new Date(item.createdAt).toLocaleString():'Date unavailable';return `<div class="gram-history-item"><div><strong>${formatGram(item.amount)} GRAM</strong><div class="gram-history-meta">${date} · ID ${String(item.id).slice(-8)}</div></div><div class="gram-status ${cls}">${status}</div></div>`;}).join('');
-  }catch(error){console.error('GRAM history:',error);box.innerHTML='<div class="gram-history-empty">Could not load history. Please refresh this page.</div>';}
+    if(!rows.length){
+      box.innerHTML='<div class="gram-history-empty">No withdrawal requests yet.</div>';
+      return;
+    }
+
+    box.innerHTML=rows.map(item=>{
+      const status=String(item.status||'Pending');
+      const cls=status.toLowerCase();
+      const date=item.createdAt?new Date(item.createdAt).toLocaleString():'Date unavailable';
+      const requestId=String(item.id||'').slice(-8);
+      return `<div class="gram-history-item">
+        <div>
+          <strong>${formatGram(item.amount)} GRAM</strong>
+          <div class="gram-history-meta">${date} · Request ID ${requestId}</div>
+        </div>
+        <div class="gram-status ${cls}">${status}</div>
+      </div>`;
+    }).join('');
+  }catch(error){
+    console.error('GRAM history:',error);
+    box.innerHTML='<div class="gram-history-empty">Could not load withdrawal history. Please try again.</div>';
+  }
 }
 
 // =====================================================
