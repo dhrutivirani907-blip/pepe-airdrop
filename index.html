@@ -43,7 +43,7 @@
 <div id="adminProcessModal" class="modal-wrap"><div class="modal"><h3>Process redeem request</h3><p id="processSummary"></p><div class="field"><label>STATUS</label><select id="processStatus" onchange="toggleCodeField()"><option>Pending</option><option>Completed</option><option>Rejected</option></select></div><div id="codeField" class="field"><label>GOOGLE PLAY REDEEM CODE</label><input id="processCode" placeholder="XGHT3872NKDB"></div><div class="field"><label>ADMIN NOTE (OPTIONAL)</label><input id="processNote" placeholder="Note for records"></div><div class="modal-actions"><button class="primary" onclick="closeModal('adminProcessModal')">CANCEL</button><button class="primary dark" onclick="saveProcess()">SAVE CHANGES</button></div></div></div>
 
 <script>
-const API = location.protocol.startsWith('http') ? location.origin : 'https://pepe-backend-wkym.onrender.com';
+const API = 'https://pepe-backend-wkym.onrender.com';
 const ADS_LINK = 'https://asiafilm.org/4/b0524f5ae1847ab4da17a54c84619cab';
 const BOT_USERNAME = 'PEPE_Faucet_Airdrop_bot';
 const COIN_RATE = {10:1500,20:3000,50:7500,100:15000};
