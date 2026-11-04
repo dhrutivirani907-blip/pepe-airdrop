@@ -181,9 +181,39 @@ async function logoutUser(){try{if(authToken&&currentUser)await api('/api/auth/l
 function renderUser(){if(!currentUser)return;$('coinBalance').textContent=Number(currentUser.coins).toLocaleString('en-IN');$('gemBalance').textContent=Number(currentUser.gems).toLocaleString('en-IN')+' Gems';$('userLabel').textContent=currentUser.name;$('redeemName').value=currentUser.name;$('redeemEmail').value=currentUser.email;$('refCode').value=currentUser.referralCode;$('refLink').value='https://t.me/'+BOT_USERNAME+'?start='+encodeURIComponent(currentUser.referralCode)}
 async function refreshUser(){if(!currentUser)return;const d=await api('/api/user/'+encodeURIComponent(currentUser.userId));currentUser=d.user;renderUser()}
 function openRedeem(btn){showScreen('redeemScreen',btn)}function openGoogleRedeem(){if(!currentUser)return openModal('loginModal');$('redeemName').value=currentUser.name;$('redeemEmail').value=currentUser.email;openModal('redeemDetailsModal')}
-async function continueRedeem(){const name=$('redeemName').value.trim(),email=$('redeemEmail').value.trim();if(name.length<2||!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){showToast('Enter valid account details.');return}closeModal('redeemDetailsModal');updateRedeemCoins();openModal('amountModal')}
+async function continueRedeem(){
+  const name=$('redeemName').value.trim();
+  const email=$('redeemEmail').value.trim().toLowerCase();
+  const emailPattern=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(name.length<2||name.length>120||!emailPattern.test(email)){
+    showToast('Enter a valid name and email address.');
+    return;
+  }
+  $('redeemName').value=name;
+  $('redeemEmail').value=email;
+  closeModal('redeemDetailsModal');
+  updateRedeemCoins();
+  openModal('amountModal');
+}
 function updateRedeemCoins(){$('redeemCoins').textContent=COIN_RATE[Number($('redeemAmount').value)].toLocaleString('en-IN')+' Coins'}
-async function submitRedeem(){const amount=Number($('redeemAmount').value);try{const d=await api('/api/redeems',{method:'POST',body:JSON.stringify({userId:currentUser.userId,amount})});currentUser.coins=d.balance.coins;currentUser.gems=d.balance.gems;renderUser();closeModal('amountModal');openModal('successModal');await loadRequests()}catch(e){showToast(e.message)}}
+async function submitRedeem(){
+  if(!currentUser){showToast('Please log in again.');openModal('loginModal');return}
+  const amount=Number($('redeemAmount').value);
+  const name=$('redeemName').value.trim();
+  const email=$('redeemEmail').value.trim().toLowerCase();
+  try{
+    const d=await api('/api/redeems',{
+      method:'POST',
+      body:JSON.stringify({userId:currentUser.userId,amount,name,email})
+    });
+    currentUser.coins=d.balance.coins;
+    currentUser.gems=d.balance.gems;
+    renderUser();
+    closeModal('amountModal');
+    openModal('successModal');
+    await loadRequests();
+  }catch(e){showToast(e.message)}
+}
 async function loadRequests(){if(!currentUser)return;try{const d=await api('/api/redeems/'+encodeURIComponent(currentUser.userId));const list=$('requestList');if(!d.requests.length){list.innerHTML='<div class="panel empty">No redeem requests yet.</div>';return}list.innerHTML=d.requests.map(r=>`<article class="request-card"><div class="request-top"><div><div class="eyebrow">GOOGLE PLAY REDEEM</div><div class="request-amount">₹${Number(r.amount).toLocaleString('en-IN')}</div></div><span class="status ${r.status}">${r.status}</span></div><div class="code-row"><span>${r.redeemCode?escapeHtml(r.redeemCode):'XXXX-XXXX-XXXX'}</span>${r.redeemCode?`<button onclick="copyText('${escapeJs(r.redeemCode)}')">COPY</button>`:''}</div><div class="request-foot">Request #${r.id} · ${new Date(r.createdAt).toLocaleString()}</div></article>`).join('')}catch(e){showToast(e.message)}}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function escapeJs(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 async function copyText(s){try{await navigator.clipboard.writeText(s);showToast('Copied to clipboard.')}catch{showToast('Copy is not available in this browser.')}}
